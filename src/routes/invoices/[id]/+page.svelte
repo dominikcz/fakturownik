@@ -1,5 +1,6 @@
 <script lang="ts">
 	import InvoicePreview from '$lib/components/InvoicePreview.svelte';
+	import { showError, showSuccess } from '$lib/toast.js';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
@@ -8,6 +9,7 @@
 		draft: 'Szkic',
 		issued: 'Wystawiona',
 		sent_to_ksef: 'Wysłana do KSeF',
+		ksef_pending_upo: 'Oczekuje na UPO',
 		ksef_accepted: 'Przyjęta przez KSeF',
 		ksef_error: 'Błąd KSeF'
 	};
@@ -16,34 +18,68 @@
 		draft: '#6b7280',
 		issued: '#2563eb',
 		sent_to_ksef: '#d97706',
+		ksef_pending_upo: '#7c3aed',
 		ksef_accepted: '#059669',
 		ksef_error: '#dc2626'
 	};
 
 	let ksefLoading = $state(false);
-	let ksefError = $state('');
-	let ksefSuccess = $state('');
+	let ksefValidationErrors = $state<{ code: string; message: string; element?: string }[]>([]);
+	let upoLoading = $state(false);
 	let invoice = $state({ ...data.invoice });
 
 	async function sendToKsef() {
 		if (!confirm('Czy na pewno chcesz wysłać fakturę do KSeF?')) return;
 		ksefLoading = true;
-		ksefError = '';
-		ksefSuccess = '';
+		ksefValidationErrors = [];
 		try {
 			const res = await fetch(`/api/invoices/${invoice.id}/send-to-ksef`, { method: 'POST' });
 			const body = await res.json();
 			if (!res.ok) {
-				ksefError = body.error ?? 'Błąd wysyłki do KSeF';
+				if (body.validationErrors?.length) {
+					ksefValidationErrors = body.validationErrors;
+					showError(`Walidacja XML nie powiodła się (${body.validationErrors.length} błędów)`);
+				} else {
+					showError(body.error ?? 'Błąd wysyłki do KSeF');
+				}
 			} else {
-				ksefSuccess = `Wysłano! Numer KSeF: ${body.ksefNumber}`;
+				showSuccess('Faktura wysłana do KSeF. Kliknij „Pobierz UPO" aby pobrać potwierdzenie odbioru.');
+				invoice.status = 'ksef_pending_upo';
+				invoice.ksefSessionRef = body.sessionRef;
+			}
+		} catch {
+			showError('Błąd połączenia z serwerem');
+		} finally {
+			ksefLoading = false;
+		}
+	}
+
+	async function fetchUpo() {
+		upoLoading = true;
+		try {
+			const res = await fetch(`/api/invoices/${invoice.id}/fetch-upo`, { method: 'POST' });
+			const body = await res.json();
+			if (!res.ok) {
+				if (body.ksefErrors?.length) {
+					ksefValidationErrors = body.ksefErrors.map((e: { description: string; details?: string[] }) => ({
+						code: 'SEMANTIC',
+						message: e.description,
+						element: e.details?.join('; ')
+					}));
+					showError(`KSeF odrzucił fakturę (${body.ksefErrors.length} ${body.ksefErrors.length === 1 ? 'błąd' : 'błędów'})`);
+					invoice.status = 'ksef_error';
+				} else {
+					showError(body.error ?? 'Błąd pobierania UPO');
+				}
+			} else {
+				showSuccess(`UPO pobrane! Numer KSeF: ${body.ksefNumber}`);
 				invoice.status = 'ksef_accepted';
 				invoice.ksefNumber = body.ksefNumber;
 			}
 		} catch {
-			ksefError = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
-			ksefLoading = false;
+			upoLoading = false;
 		}
 	}
 </script>
@@ -83,7 +119,14 @@
 					class="btn btn-ghost"
 					title="Pobierz PDF"
 				>
-					<span class="mdi mdi-file-pdf-box"></span> PDF
+					<span class="mdi mdi-file-download-outline"></span> PDF
+				</a>
+				<a
+					href="/api/invoices/{invoice.id}/xml"
+					class="btn btn-ghost"
+					title="Pobierz XML FA(3)"
+				>
+					<span class="mdi mdi-code-tags"></span> XML
 				</a>
 				{#if invoice.status === 'draft' || invoice.status === 'issued' || invoice.status === 'ksef_error'}
 					<button
@@ -99,18 +142,43 @@
 						Wyślij do KSeF
 					</button>
 				{/if}
+				{#if invoice.status === 'ksef_pending_upo'}
+					<button
+						class="btn btn-primary"
+						onclick={fetchUpo}
+						disabled={upoLoading}
+					>
+						{#if upoLoading}
+							<span class="mdi mdi-loading spin"></span>
+						{:else}
+							<span class="mdi mdi-file-check"></span>
+						{/if}
+						Pobierz UPO
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
 
-	{#if ksefError}
-		<div class="alert alert-error">{ksefError}</div>
+	{#if ksefValidationErrors.length > 0}
+		<div class="validation-errors">
+			<div class="validation-errors-title">
+				<span class="mdi mdi-alert-circle"></span>
+				Walidacja XML nie powiodła się ({ksefValidationErrors.length} {ksefValidationErrors.length === 1 ? 'błąd' : 'błędy/ów'}):
+			</div>
+			<ul class="validation-errors-list">
+				{#each ksefValidationErrors as issue}
+					<li>
+						<span class="issue-code">{issue.code}</span>
+						<span class="issue-msg">{issue.message}</span>
+						{#if issue.element}<span class="issue-el">&lt;{issue.element}&gt;</span>{/if}
+					</li>
+				{/each}
+			</ul>
+		</div>
 	{/if}
-	{#if !ksefError && invoice.status === 'ksef_error' && invoice.ksefErrorMessage}
+	{#if invoice.status === 'ksef_error' && invoice.ksefErrorMessage}
 		<div class="alert alert-error">Ostatni błąd KSeF: {invoice.ksefErrorMessage}</div>
-	{/if}
-	{#if ksefSuccess}
-		<div class="alert alert-success">{ksefSuccess}</div>
 	{/if}
 
 	<!-- Podgląd faktury -->
@@ -216,19 +284,54 @@
 		margin-bottom: 16px;
 	}
 
-	.alert-success {
-		background: #f0fdf4;
-		border: 1px solid #bbf7d0;
-		color: #059669;
-		padding: 10px 14px;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		margin-bottom: 16px;
-	}
-
 	@keyframes spin {
 		from { transform: rotate(0deg); }
 		to { transform: rotate(360deg); }
 	}
 	.spin { animation: spin 0.8s linear infinite; }
+
+	.validation-errors {
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 6px;
+		padding: 12px 16px;
+		margin-bottom: 16px;
+	}
+	.validation-errors-title {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: #dc2626;
+		margin-bottom: 10px;
+	}
+	.validation-errors-list {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.validation-errors-list li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 6px;
+		font-size: 0.85rem;
+		color: #7f1d1d;
+	}
+	.issue-code {
+		font-family: monospace;
+		background: #fee2e2;
+		padding: 1px 6px;
+		border-radius: 4px;
+		font-size: 0.78rem;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+	.issue-el {
+		font-family: monospace;
+		color: #b91c1c;
+		font-size: 0.78rem;
+	}
 </style>

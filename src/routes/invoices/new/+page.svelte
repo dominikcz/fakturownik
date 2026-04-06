@@ -1,5 +1,6 @@
 <script lang="ts">
 	import InvoiceForm from '$lib/components/InvoiceForm.svelte';
+	import { showError } from '$lib/toast.js';
 	import type { PageData } from './$types.js';
 	import { goto } from '$app/navigation';
 	import type { Invoice } from '$lib/types.js';
@@ -21,12 +22,14 @@
 			if (!res.ok) {
 				const err = await res.json();
 				errorMsg = err.error ?? 'Błąd zapisu faktury';
+				showError(errorMsg);
 				return;
 			}
 			const invoice = await res.json();
 			await goto(`/invoices/${invoice.id}`);
 		} catch {
 			errorMsg = 'Błąd połączenia z serwerem';
+			showError(errorMsg);
 		} finally {
 			saving = false;
 		}
@@ -48,8 +51,9 @@
 		settings={data.settings}
 		clients={data.clients}
 		onSave={handleSave}
-		saving={saving}
+		onError={(msg) => { errorMsg = msg; showError(msg); }}
 		error={errorMsg}
+		saving={saving}
 	/>
 </div>
 

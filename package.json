@@ -46,7 +46,7 @@
 	},
 	"dependencies": {
 		"@ksefuj/validator": "^0.3.0",
-		"@mdab25/ksef-pdf": "^0.2.1",
+		"@zerodevx/svelte-toast": "^0.9.6",
 		"ksef-client": "^0.4.1",
 		"node-forge": "^1.4.0",
 		"qrcode": "^1.5.4",

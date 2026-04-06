@@ -7,12 +7,14 @@
 		invoice?: Partial<Invoice>;
 		settings: Settings;
 		clients: Client[];
-		onSave: (invoice: Partial<Invoice>) => void;
+		onSave: (invoice: Partial<Invoice>) => void | Promise<void>;
+		onError?: (msg: string) => void;
 		saving?: boolean;
 		error?: string;
+		cancelHref?: string;
 	}
 
-	let { invoice = {}, settings, clients, onSave, saving = false, error = '' }: Props = $props();
+	let { invoice = {}, settings, clients, onSave, onError, saving = false, error = '', cancelHref = '/invoices' }: Props = $props();
 
 	const today = new Date().toISOString().slice(0, 10);
 
@@ -35,13 +37,13 @@
 	let comments = $state(invoice.comments ?? '');
 	let status = $state(invoice.status ?? 'draft');
 
-	// Gdy zmienia się data wystawienia → aktualizuj datę sprzedaży i termin płatności
-	// (tylko jeśli nie edytujemy istniejącej faktury z już zapisanymi datami)
-	const isNew = !invoice.issueDate;
+	// Gdy zmienia się data wystawienia → aktualizuj datę sprzedaży (jeśli była równa) i termin płatności
+	let prevIssueDate = issueDate;
 	$effect(() => {
-		if (isNew) {
-			saleDate = issueDate;
+		if (issueDate !== prevIssueDate) {
+			if (saleDate === prevIssueDate) saleDate = issueDate;
 			paymentDueDate = addDays(issueDate, paymentDays);
+			prevIssueDate = issueDate;
 		}
 	});
 
@@ -167,8 +169,26 @@
 
 	let showClientDropdown = $state(false);
 
-	function handleSubmit(e: Event) {
+	async function handleSubmit(e: Event) {
 		e.preventDefault();
+
+		// Walidacja wyliczeń pozycji
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
+			const recalced = recalcItem(item);
+			const tol = 0.015;
+			if (
+				Math.abs(item.netTotal - recalced.netTotal) > tol ||
+				Math.abs(item.vatTotal - recalced.vatTotal) > tol ||
+				Math.abs(item.grossTotal - recalced.grossTotal) > tol
+			) {
+				// Nadpisz pozycję poprawioną wartością i zwróć błąd
+				items[i] = recalced;
+				onError?.(`Pozycja ${i + 1}: wyliczenia kwot nie zgadzają się i zostały poprawione automatycznie. Sprawdź i zapisz ponownie.`);
+				return;
+			}
+		}
+
 		const invoiceData: Partial<Invoice> = {
 			sequenceNumber,
 			issueDate,
@@ -196,7 +216,7 @@
 			items,
 			summary: summary()
 		};
-		onSave(invoiceData);
+		await onSave(invoiceData);
 	}
 
 	const vatRates: VatRate[] = ['23', '8', '5', '0', 'zw', 'np'];
@@ -491,7 +511,7 @@
 
 	<!-- Akcje -->
 	<div class="form-actions">
-		<a href="/invoices" class="btn btn-ghost">Anuluj</a>
+		<a href={cancelHref} class="btn btn-ghost">Anuluj</a>
 		<button type="submit" class="btn btn-primary" disabled={saving}>
 			{#if saving}<span class="mdi mdi-loading spin"></span>{/if}
 			Zapisz fakturę

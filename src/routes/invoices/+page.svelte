@@ -7,6 +7,7 @@
 		draft: 'Szkic',
 		issued: 'Wystawiona',
 		sent_to_ksef: 'Wysłana',
+		ksef_pending_upo: 'Oczekuje na UPO',
 		ksef_accepted: 'KSeF OK',
 		ksef_error: 'Błąd KSeF'
 	};
@@ -14,6 +15,7 @@
 		draft: '#6b7280',
 		issued: '#2563eb',
 		sent_to_ksef: '#d97706',
+		ksef_pending_upo: '#7c3aed',
 		ksef_accepted: '#059669',
 		ksef_error: '#dc2626'
 	};
@@ -95,6 +97,8 @@
 								<a href="/invoices/{invoice.id}/edit" class="icon-btn" title="Edytuj">
 									<span class="mdi mdi-pencil"></span>
 								</a>
+							<a href="/api/invoices/{invoice.id}/pdf" target="_blank" class="text-btn" title="Pobierz PDF">PDF</a>
+							<a href="/api/invoices/{invoice.id}/xml" class="text-btn" title="Pobierz XML (FA3)">XML</a>
 							</td>
 						</tr>
 					{/each}
@@ -212,6 +216,11 @@
 		font-weight: 500;
 	}
 
+	.table td a.text-btn {
+		color: #2563eb;
+		font-weight: 700;
+	}
+
 	.amount {
 		text-align: right;
 		font-variant-numeric: tabular-nums;
@@ -239,10 +248,32 @@
 		border-radius: 5px;
 		color: #64748b;
 		background: transparent;
-		transition: background 0.15s;
+		transition: background 0.15s, color 0.15s;
+		font-size: 1.2rem;
 	}
 
 	.icon-btn:hover {
+		background: #f1f5f9;
+		color: #2563eb;
+	}
+
+
+
+	.text-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 30px;
+		padding: 0 6px;
+		border-radius: 5px;
+		color: #64748b;
+		background: transparent;
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-decoration: none;
+		transition: background 0.15s, color 0.15s;
+	}
+	.text-btn:hover {
 		background: #f1f5f9;
 		color: #2563eb;
 	}

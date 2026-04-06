@@ -1,10 +1,20 @@
-import { getSettings, getClients, getInvoice } from '$lib/server/data.js';
+import { getSettings, getClients, getInvoice, listInvoices } from '$lib/server/data.js';
+import { getNextSequenceForPeriod } from '$lib/server/numeracja.js';
 import type { PageServerLoad } from './$types.js';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = ({ url }) => {
 	const settings = getSettings();
 	const clients = getClients();
+	const invoices = listInvoices();
+	const nextSeq = getNextSequenceForPeriod(
+		invoices,
+		settings.invoiceNumberTemplate,
+		new Date()
+	);
+	// Zaktualizuj settings.nextInvoiceNumber tak żeby InvoiceForm dostał właściwą wartość
+	const settingsWithNext = { ...settings, nextInvoiceNumber: nextSeq };
+
 	const copyFrom = url.searchParams.get('copyFrom');
 
 	let baseInvoice = undefined;
@@ -15,7 +25,7 @@ export const load: PageServerLoad = ({ url }) => {
 			...source,
 			id: undefined,
 			number: undefined,
-			sequenceNumber: settings.nextInvoiceNumber,
+			sequenceNumber: nextSeq,
 			issueDate: new Date().toISOString().slice(0, 10),
 			saleDate: new Date().toISOString().slice(0, 10),
 			status: 'draft' as const,
@@ -27,5 +37,5 @@ export const load: PageServerLoad = ({ url }) => {
 		};
 	}
 
-	return { settings, clients, baseInvoice };
+	return { settings: settingsWithNext, clients, baseInvoice };
 };

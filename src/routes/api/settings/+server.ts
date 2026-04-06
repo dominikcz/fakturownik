@@ -16,9 +16,10 @@ export const PUT: RequestHandler = async ({ request }) => {
 		const body = await request.json();
 		const current = getSettings();
 		const updated = { ...current, ...body };
-		// certPem/keyPem zarządzane wyłącznie przez /api/settings/ksef-certs
+		// certPem/keyPem/certs zarządzane wyłącznie przez /api/settings/ksef-certs
 		updated.ksef.certPem = current.ksef.certPem;
 		updated.ksef.keyPem = current.ksef.keyPem;
+		updated.ksef.certs = current.ksef.certs;
 		saveSettings(updated);
 		return json(updated);
 	} catch (err) {

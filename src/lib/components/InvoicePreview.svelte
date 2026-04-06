@@ -2,7 +2,7 @@
 	import type { Invoice, Settings } from '$lib/types.js';
 
 	interface Props {
-		invoice: Invoice;
+		invoice: Invoice & { id?: string };
 		settings: Settings;
 	}
 
@@ -26,6 +26,17 @@
 	function fmt(n: number) {
 		return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 	}
+
+	let qrDataUrl = $state('');
+
+	$effect(() => {
+		if (invoice.id) {
+			fetch(`/api/invoices/${invoice.id}/qr`)
+				.then((r) => (r.ok ? r.json() : null))
+				.then((data) => { if (data?.dataUrl) qrDataUrl = data.dataUrl; })
+				.catch(() => {});
+		}
+	});
 </script>
 
 <div class="invoice-preview" style="font-family: {settings.defaultFont ?? 'Trebuchet MS'}, sans-serif">
@@ -167,6 +178,20 @@
 			<p>{invoice.comments}</p>
 		</div>
 	{/if}
+
+	<!-- QR -->
+	{#if qrDataUrl}
+		<div class="qr-section">
+			<img src={qrDataUrl} alt="Kod QR faktury" class="qr-img" />
+			<div class="qr-label">
+				{#if invoice.ksefNumber}
+					Weryfikacja KSeF
+				{:else}
+					Dane faktury
+				{/if}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -208,9 +233,9 @@
 	}
 
 	.invoice-number {
-		font-size: 1.1rem;
-		font-weight: 600;
-		color: #2563eb;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #111827;
 		margin-top: 4px;
 	}
 
@@ -403,6 +428,29 @@
 	.comments-section p {
 		font-size: 0.9rem;
 		color: #374151;
+	}
+
+	.qr-section {
+		margin-top: 16px;
+		padding-top: 12px;
+		border-top: 1px solid #e2e8f0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 4px;
+	}
+
+	.qr-img {
+		width: 80px;
+		height: 80px;
+		image-rendering: pixelated;
+	}
+
+	.qr-label {
+		font-size: 0.7rem;
+		color: #94a3b8;
+		text-align: center;
+		width: 80px;
 	}
 
 	@media print {

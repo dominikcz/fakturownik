@@ -10,13 +10,20 @@ export interface SellerInfo {
 	logo?: string; // base64 lub ścieżka
 }
 
+export interface KsefEnvCert {
+	certPem: string;
+	keyPem: string;
+	certFileName?: string;
+}
+
 export interface KsefSettings {
 	environment: 'TEST' | 'DEMO' | 'PRD';
-	certPath?: string;  // zachowane dla kompatybilności wstecznej
-	keyPath?: string;   // zachowane dla kompatybilności wstecznej
-	certPem?: string;   // treść certyfikatu PEM (preferowane nad certPath)
-	keyPem?: string;    // treść odszyfrowanego klucza PEM (preferowane nad keyPath)
-	nip?: string;       // opcjonalny – używany jest NIP sprzedawcy gdy nie podano
+	certs?: { TEST?: KsefEnvCert; DEMO?: KsefEnvCert; PRD?: KsefEnvCert };
+	certPath?: string;
+	keyPath?: string;
+	certPem?: string;
+	keyPem?: string;
+	nip?: string;
 }
 
 export interface Settings {
@@ -51,6 +58,7 @@ export type InvoiceStatus =
 	| 'draft'
 	| 'issued'
 	| 'sent_to_ksef'
+	| 'ksef_pending_upo'
 	| 'ksef_accepted'
 	| 'ksef_error';
 
@@ -106,6 +114,7 @@ export interface Invoice {
 	status: InvoiceStatus;
 	ksefNumber?: string;
 	ksefSessionRef?: string;
+	ksefInvoiceRef?: string;
 	upoXml?: string;
 	ksefErrorMessage?: string;
 	createdAt: string;

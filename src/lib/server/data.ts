@@ -97,7 +97,11 @@ export function listInvoices(): Invoice[] {
 		if (inv) invoices.push(inv);
 	}
 	return invoices.sort(
-		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+		(a, b) => {
+			const dateCmp = new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
+			if (dateCmp !== 0) return dateCmp;
+			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+		}
 	);
 }
 

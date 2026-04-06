@@ -3,6 +3,9 @@ import { createPrivateKey } from 'node:crypto';
 import { getSettings, saveSettings } from '$lib/server/data.js';
 import type { RequestHandler } from './$types.js';
 
+type KsefEnv = 'TEST' | 'DEMO' | 'PRD';
+const VALID_ENVS: KsefEnv[] = ['TEST', 'DEMO', 'PRD'];
+
 export const POST: RequestHandler = async ({ request }) => {
 	let formData: FormData;
 	try {
@@ -14,6 +17,12 @@ export const POST: RequestHandler = async ({ request }) => {
 	const certFile = formData.get('cert');
 	const keyFile = formData.get('key');
 	const password = formData.get('password');
+	const envRaw = formData.get('environment');
+
+	if (!envRaw || !VALID_ENVS.includes(envRaw as KsefEnv)) {
+		return json({ error: 'Nieprawidłowe lub brakujące środowisko (TEST|DEMO|PRD)' }, { status: 400 });
+	}
+	const environment = envRaw as KsefEnv;
 
 	if (!certFile || !(certFile instanceof File)) {
 		return json({ error: 'Brak pliku certyfikatu' }, { status: 400 });
@@ -65,17 +74,37 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const settings = await getSettings();
-	settings.ksef.certPem = certPem;
-	settings.ksef.keyPem = keyPem;
+	settings.ksef.certs ??= {};
+	settings.ksef.certs[environment] = { certPem, keyPem, certFileName: certFile.name };
+	// Wyczyść legacy pola jeśli środowisko zgadza się z aktywnym
+	if (environment === settings.ksef.environment) {
+		delete settings.ksef.certPem;
+		delete settings.ksef.keyPem;
+		delete settings.ksef.certPath;
+		delete settings.ksef.keyPath;
+	}
 	await saveSettings(settings);
 
 	return json({ ok: true });
 };
 
-export const DELETE: RequestHandler = async () => {
+export const DELETE: RequestHandler = async ({ url }) => {
+	const envRaw = url.searchParams.get('environment');
+	if (!envRaw || !VALID_ENVS.includes(envRaw as KsefEnv)) {
+		return json({ error: 'Nieprawidłowe lub brakujące środowisko (TEST|DEMO|PRD)' }, { status: 400 });
+	}
+	const environment = envRaw as KsefEnv;
 	const settings = await getSettings();
-	delete settings.ksef.certPem;
-	delete settings.ksef.keyPem;
+	if (settings.ksef.certs) {
+		delete settings.ksef.certs[environment];
+	}
+	// Usuń też legacy pola (dotyczą zawsze aktywnego środowiska)
+	if (environment === settings.ksef.environment) {
+		delete settings.ksef.certPem;
+		delete settings.ksef.keyPem;
+		delete settings.ksef.certPath;
+		delete settings.ksef.keyPath;
+	}
 	await saveSettings(settings);
 	return json({ ok: true });
 };

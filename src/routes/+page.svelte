@@ -7,6 +7,7 @@
 		draft: 'Szkic',
 		issued: 'Wystawiona',
 		sent_to_ksef: 'Wysłana do KSeF',
+		ksef_pending_upo: 'Oczekuje na UPO',
 		ksef_accepted: 'Przyjęta przez KSeF',
 		ksef_error: 'Błąd KSeF'
 	};
@@ -15,6 +16,7 @@
 		draft: '#6b7280',
 		issued: '#2563eb',
 		sent_to_ksef: '#d97706',
+		ksef_pending_upo: '#7c3aed',
 		ksef_accepted: '#059669',
 		ksef_error: '#dc2626'
 	};

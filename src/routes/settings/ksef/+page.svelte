@@ -4,6 +4,8 @@
 	let { data }: { data: { settings: Settings } } = $props();
 	let settings = $state<Settings>(JSON.parse(JSON.stringify(data.settings)));
 
+	let certTab = $state<'TEST' | 'DEMO' | 'PRD'>('TEST');
+
 	let saving = $state(false);
 	let successMsg = $state('');
 	let errorMsg = $state('');
@@ -56,6 +58,7 @@
 			const fd = new FormData();
 			fd.append('cert', certFile);
 			fd.append('key', keyFile);
+			fd.append('environment', certTab);
 			if (keyPassword) fd.append('password', keyPassword);
 			const res = await fetch('/api/settings/ksef-certs', { method: 'POST', body: fd });
 			const result = await res.json();
@@ -63,8 +66,8 @@
 				uploadError = result.error ?? 'Błąd wgrywania';
 			} else {
 				uploadMsg = 'Certyfikat i klucz zostały wgrane.';
-				settings.ksef.certPem = 'loaded';
-				settings.ksef.keyPem = 'loaded';
+				settings.ksef.certs ??= {};
+				settings.ksef.certs[certTab] = { certPem: 'loaded', keyPem: 'loaded', certFileName: certFile.name };
 				certFile = null;
 				keyFile = null;
 				keyPassword = '';
@@ -79,10 +82,19 @@
 
 	async function removeCerts() {
 		if (!confirm('Usunąć wgrany certyfikat i klucz?')) return;
-		const res = await fetch('/api/settings/ksef-certs', { method: 'DELETE' });
+		const res = await fetch(`/api/settings/ksef-certs?environment=${certTab}`, { method: 'DELETE' });
 		if (res.ok) {
-			settings.ksef.certPem = undefined;
-			settings.ksef.keyPem = undefined;
+			if (settings.ksef.certs) {
+				delete settings.ksef.certs[certTab];
+				settings.ksef.certs = { ...settings.ksef.certs };
+			}
+			// Wyczyść też legacy pola jeśli środowisko się zgadza
+			if (certTab === settings.ksef.environment) {
+				delete settings.ksef.certPem;
+				delete settings.ksef.keyPem;
+				delete settings.ksef.certPath;
+				delete settings.ksef.keyPath;
+			}
 		}
 	}
 
@@ -93,7 +105,9 @@
 		keyFile = (e.currentTarget as HTMLInputElement).files?.[0] ?? null;
 	}
 
-	const hasCerts = $derived(!!(settings.ksef.certPem || settings.ksef.certPath));
+	function hasEnvCerts(env: 'TEST' | 'DEMO' | 'PRD') {
+		return !!(settings.ksef.certs?.[env]?.certPem || (env === settings.ksef.environment && (settings.ksef.certPem || settings.ksef.certPath)));
+	}
 </script>
 
 {#if successMsg}
@@ -128,23 +142,44 @@
 
 <h2 class="section-title" style="margin-top:28px">Certyfikat KSeF</h2>
 
-<div class="cert-status" class:cert-ok={hasCerts} class:cert-missing={!hasCerts}>
-	<span class="mdi {hasCerts ? 'mdi-check-circle' : 'mdi-alert-circle'}"></span>
-	{#if hasCerts}
-		Certyfikat jest wgrany.
+<div class="env-tabs">
+	{#each ['TEST', 'DEMO', 'PRD'] as env}
+		<button
+			type="button"
+			class="env-tab {certTab === env ? 'active' : ''}"
+			onclick={() => { certTab = env as 'TEST' | 'DEMO' | 'PRD'; certFile = null; keyFile = null; keyPassword = ''; uploadMsg = ''; uploadError = ''; }}
+		>{env}{#if env === settings.ksef.environment}<span class="env-tab-active-dot" title="aktywne środowisko"></span>{/if}</button>
+	{/each}
+</div>
+
+<div class="cert-status" class:cert-ok={hasEnvCerts(certTab)} class:cert-missing={!hasEnvCerts(certTab)}>
+	<span class="mdi {hasEnvCerts(certTab) ? 'mdi-check-circle' : 'mdi-alert-circle'}"></span>
+	{#if hasEnvCerts(certTab)}
+		Certyfikat ({certTab}) jest wgrany.
+		{#if settings.ksef.certs?.[certTab]?.certFileName}
+			<span class="cert-filename">{settings.ksef.certs?.[certTab]?.certFileName}</span>
+		{/if}
 		<button class="btn-link" onclick={removeCerts}>Usuń</button>
 	{:else}
-		Brak certyfikatu – wgraj pliki poniżej.
+		Brak certyfikatu ({certTab}) – wgraj pliki poniżej.
 	{/if}
 </div>
 
 <div class="info-box" style="margin-bottom:16px">
 	<span class="mdi mdi-certificate"></span>
 	<div>
-		Zaloguj się do <a href="https://ksef.podatki.gov.pl" target="_blank" rel="noreferrer">ksef.podatki.gov.pl</a>
-		i wygeneruj certyfikat (sekcja „Certyfikaty"). Otrzymasz dwa pliki: <code>cert.crt</code>
-		i <code>cert.key</code>. Zaszyfrowany klucz możesz wgrać z hasłem – aplikacja odszyfruje go
-		automatycznie.
+		{#if certTab === 'TEST'}
+			Zaloguj się do <a class="info-link" href="https://ap-test.ksef.mf.gov.pl/" target="_blank" rel="noreferrer">ap-test.ksef.mf.gov.pl</a>
+			i wygeneruj certyfikat (sekcja „Certyfikaty").
+		{:else if certTab === 'DEMO'}
+			Zaloguj się do <a class="info-link" href="https://ap-demo.ksef.mf.gov.pl/" target="_blank" rel="noreferrer">ap-demo.ksef.mf.gov.pl</a>
+			i wygeneruj certyfikat (sekcja „Certyfikaty").
+		{:else}
+			Zaloguj się do <a class="info-link" href="https://ap.ksef.mf.gov.pl/" target="_blank" rel="noreferrer">ap.ksef.mf.gov.pl</a>
+			i wygeneruj certyfikat (sekcja „Certyfikaty").
+		{/if}
+		Otrzymasz dwa pliki: <code>cert.crt</code> i <code>cert.key</code>.
+		Zaszyfrowany klucz możesz wgrać z hasłem – aplikacja odszyfruje go automatycznie.
 	</div>
 </div>
 
@@ -185,7 +220,7 @@
 			disabled={uploading || !certFile || !keyFile}
 		>
 			<span class="mdi mdi-upload"></span>
-			{uploading ? 'Wgrywanie...' : 'Wgraj certyfikat i klucz'}
+			{uploading ? 'Wgrywanie...' : `Wgraj certyfikat i klucz (${certTab})`}
 		</button>
 	</div>
 </div>
@@ -207,6 +242,13 @@
 	.cert-missing {
 		background: #fef3c7;
 		color: #92400e;
+	}
+	.cert-filename {
+		font-size: 0.85em;
+		font-weight: 400;
+		opacity: 0.8;
+		font-family: monospace;
+		margin-left: 4px;
 	}
 	.btn-link {
 		background: none;
@@ -259,5 +301,48 @@
 	}
 	.toggle-pw:hover {
 		color: #333;
+	}
+	.env-tabs {
+		display: flex;
+		gap: 0;
+		margin-bottom: 1rem;
+		border-bottom: 2px solid #dee2e6;
+	}
+	.env-tab {
+		padding: 0.5rem 1.25rem;
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-size: 0.9rem;
+		color: #6c757d;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -2px;
+		transition: color 0.15s;
+	}
+	.env-tab:hover { color: #333; }
+	.env-tab.active {
+		color: #0d6efd;
+		border-bottom-color: #0d6efd;
+		font-weight: 500;
+	}
+	.env-tab-active-dot {
+		display: inline-block;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #22c55e;
+		margin-left: 5px;
+		vertical-align: middle;
+		margin-bottom: 1px;
+	}
+	:global(.info-box a.info-link) {
+		color: #0d47a1;
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	:global(.info-box a.info-link:hover) {
+		color: #1565c0;
+		text-decoration-thickness: 2px;
 	}
 </style>

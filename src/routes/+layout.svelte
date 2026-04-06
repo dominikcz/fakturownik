@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import '../app.css';
 
 	let { children } = $props();
@@ -47,6 +48,8 @@
 		{@render children()}
 	</main>
 </div>
+
+<SvelteToast />
 
 <style>
 	.app-shell {
@@ -119,7 +122,6 @@
 	.main-content {
 		flex: 1;
 		padding: 24px;
-		overflow-y: auto;
 		min-width: 0;
 	}
 </style>
