@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
+	import { showError, showSuccess } from '$lib/toast.js';
 	import type { Settings } from '$lib/types.js';
 
 	let { data }: { data: { settings: Settings } } = $props();
-	let settings = $state<Settings>(JSON.parse(JSON.stringify(data.settings)));
+	let settings = $state<Settings>(untrack(() => JSON.parse(JSON.stringify(data.settings))));
 
 	let saving = $state(false);
-	let successMsg = $state('');
-	let errorMsg = $state('');
 	let logoUploading = $state(false);
 
 	const fonts = [
@@ -21,8 +21,6 @@
 
 	async function save() {
 		saving = true;
-		successMsg = '';
-		errorMsg = '';
 		try {
 			const res = await fetch('/api/settings', {
 				method: 'PUT',
@@ -31,13 +29,12 @@
 			});
 			if (!res.ok) {
 				const err = await res.json();
-				errorMsg = err.error ?? 'Błąd zapisu';
+				showError(err.error ?? 'Błąd zapisu');
 			} else {
-				successMsg = 'Ustawienia zostały zapisane.';
-				setTimeout(() => (successMsg = ''), 3000);
+				showSuccess('Ustawienia zostały zapisane.');
 			}
 		} catch {
-			errorMsg = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
 			saving = false;
 		}
@@ -55,13 +52,12 @@
 			if (res.ok) {
 				const body = await res.json();
 				settings.seller.logo = body.logo;
-				successMsg = 'Logo zostało przesłane.';
-				setTimeout(() => (successMsg = ''), 3000);
+				showSuccess('Logo zostało przesłane.');
 			} else {
-				errorMsg = 'Błąd przesyłania logo';
+				showError('Błąd przesyłania logo');
 			}
 		} catch {
-			errorMsg = 'Błąd przesyłania logo';
+			showError('Błąd przesyłania logo');
 		} finally {
 			logoUploading = false;
 		}
@@ -71,13 +67,6 @@
 		settings.seller.logo = undefined;
 	}
 </script>
-
-{#if successMsg}
-	<div class="alert alert-success">{successMsg}</div>
-{/if}
-{#if errorMsg}
-	<div class="alert alert-error">{errorMsg}</div>
-{/if}
 
 <div class="page-actions">
 	<button class="btn btn-primary" onclick={save} disabled={saving}>
@@ -98,11 +87,18 @@
 </div>
 
 <div class="form-group font-preview" style="font-family: {settings.defaultFont}, sans-serif">
-	Podgląd czcionki: Faktura VAT nr 1/4/2026
+	Podgląd czcionki: Faktura nr 1/4/2026
+</div>
+
+<div class="form-group" style="margin-top: 16px">
+	<label class="checkbox-label">
+		<input type="checkbox" bind:checked={settings.invoiceZebraStripes} />
+		Naprzemienne tło wierszy pozycji (zebra)
+	</label>
 </div>
 
 <div class="form-group" style="margin-top:24px">
-	<label>Logo firmy</label>
+	<p class="form-label">Logo firmy</p>
 	{#if settings.seller.logo}
 		<div class="logo-preview">
 			<img src={settings.seller.logo} alt="Logo firmy" />
@@ -119,3 +115,20 @@
 		<input type="file" accept="image/*" onchange={uploadLogo} disabled={logoUploading} hidden />
 	</label>
 </div>
+
+<style>
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9rem;
+		color: #374151;
+		cursor: pointer;
+	}
+	.form-label {
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: #374151;
+		margin-bottom: 6px;
+	}
+</style>

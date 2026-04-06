@@ -30,6 +30,7 @@ export interface Settings {
 	seller: SellerInfo;
 	invoiceNumberTemplate: string;
 	defaultFont: string;
+	invoiceZebraStripes: boolean;
 	ksef: KsefSettings;
 	nextInvoiceNumber: number;
 	defaultPaymentDays: number;

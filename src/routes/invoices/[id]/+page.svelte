@@ -1,6 +1,7 @@
 <script lang="ts">
 	import InvoicePreview from '$lib/components/InvoicePreview.svelte';
 	import { showError, showSuccess } from '$lib/toast.js';
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
@@ -26,7 +27,7 @@
 	let ksefLoading = $state(false);
 	let ksefValidationErrors = $state<{ code: string; message: string; element?: string }[]>([]);
 	let upoLoading = $state(false);
-	let invoice = $state({ ...data.invoice });
+	let invoice = $state(untrack(() => ({ ...data.invoice })));
 
 	async function sendToKsef() {
 		if (!confirm('Czy na pewno chcesz wysłać fakturę do KSeF?')) return;
@@ -113,6 +114,9 @@
 				>
 					<span class="mdi mdi-content-copy"></span> Wystaw podobną
 				</a>
+				<button class="btn btn-ghost" onclick={() => window.print()} title="Drukuj">
+					<span class="mdi mdi-printer-outline"></span> Drukuj
+				</button>
 				<a
 					href="/api/invoices/{invoice.id}/pdf"
 					target="_blank"
@@ -333,5 +337,12 @@
 		font-family: monospace;
 		color: #b91c1c;
 		font-size: 0.78rem;
+	}
+
+	@media print {
+		:global(.sidebar) { display: none !important; }
+		:global(.main-content) { padding: 0 !important; }
+		.page-header { display: none !important; }
+		.validation-errors { display: none !important; }
 	}
 </style>

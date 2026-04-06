@@ -672,7 +672,7 @@
 		padding: 8px 6px;
 		font-size: 0.72rem;
 		font-weight: 600;
-		color: #64748b;
+		color: #000;
 		text-transform: uppercase;
 		border-bottom: 2px solid #e2e8f0;
 		text-align: left;

@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
+	import { showError, showSuccess } from '$lib/toast.js';
 	import type { Settings } from '$lib/types.js';
 
 	let { data }: { data: { settings: Settings } } = $props();
-	let settings = $state<Settings>(JSON.parse(JSON.stringify(data.settings)));
+	let settings = $state<Settings>(untrack(() => JSON.parse(JSON.stringify(data.settings))));
 
 	let certTab = $state<'TEST' | 'DEMO' | 'PRD'>('TEST');
 
 	let saving = $state(false);
-	let successMsg = $state('');
-	let errorMsg = $state('');
 
 	// Stan uploadu certyfikatu
 	let certFile = $state<File | null>(null);
@@ -16,8 +16,6 @@
 	let keyPassword = $state('');
 	let showPassword = $state(false);
 	let uploading = $state(false);
-	let uploadMsg = $state('');
-	let uploadError = $state('');
 
 	const ksefEnvs = [
 		{ value: 'TEST', label: 'TEST (środowisko testowe)' },
@@ -27,8 +25,6 @@
 
 	async function save() {
 		saving = true;
-		successMsg = '';
-		errorMsg = '';
 		try {
 			const res = await fetch('/api/settings', {
 				method: 'PUT',
@@ -37,13 +33,12 @@
 			});
 			if (!res.ok) {
 				const err = await res.json();
-				errorMsg = err.error ?? 'Błąd zapisu';
+				showError(err.error ?? 'Błąd zapisu');
 			} else {
-				successMsg = 'Ustawienia zostały zapisane.';
-				setTimeout(() => (successMsg = ''), 3000);
+				showSuccess('Ustawienia zostały zapisane.');
 			}
 		} catch {
-			errorMsg = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
 			saving = false;
 		}
@@ -52,8 +47,6 @@
 	async function uploadCerts() {
 		if (!certFile || !keyFile) return;
 		uploading = true;
-		uploadMsg = '';
-		uploadError = '';
 		try {
 			const fd = new FormData();
 			fd.append('cert', certFile);
@@ -63,18 +56,17 @@
 			const res = await fetch('/api/settings/ksef-certs', { method: 'POST', body: fd });
 			const result = await res.json();
 			if (!res.ok) {
-				uploadError = result.error ?? 'Błąd wgrywania';
+				showError(result.error ?? 'Błąd wgrywania');
 			} else {
-				uploadMsg = 'Certyfikat i klucz zostały wgrane.';
+				showSuccess('Certyfikat i klucz zostały wgrane.');
 				settings.ksef.certs ??= {};
 				settings.ksef.certs[certTab] = { certPem: 'loaded', keyPem: 'loaded', certFileName: certFile.name };
 				certFile = null;
 				keyFile = null;
 				keyPassword = '';
-				setTimeout(() => (uploadMsg = ''), 4000);
 			}
 		} catch {
-			uploadError = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
 			uploading = false;
 		}
@@ -110,13 +102,6 @@
 	}
 </script>
 
-{#if successMsg}
-	<div class="alert alert-success">{successMsg}</div>
-{/if}
-{#if errorMsg}
-	<div class="alert alert-error">{errorMsg}</div>
-{/if}
-
 <div class="page-actions">
 	<button class="btn btn-primary" onclick={save} disabled={saving}>
 		<span class="mdi mdi-content-save"></span>
@@ -147,7 +132,7 @@
 		<button
 			type="button"
 			class="env-tab {certTab === env ? 'active' : ''}"
-			onclick={() => { certTab = env as 'TEST' | 'DEMO' | 'PRD'; certFile = null; keyFile = null; keyPassword = ''; uploadMsg = ''; uploadError = ''; }}
+			onclick={() => { certTab = env as 'TEST' | 'DEMO' | 'PRD'; certFile = null; keyFile = null; keyPassword = ''; }}
 		>{env}{#if env === settings.ksef.environment}<span class="env-tab-active-dot" title="aktywne środowisko"></span>{/if}</button>
 	{/each}
 </div>
@@ -182,13 +167,6 @@
 		Zaszyfrowany klucz możesz wgrać z hasłem – aplikacja odszyfruje go automatycznie.
 	</div>
 </div>
-
-{#if uploadMsg}
-	<div class="alert alert-success" style="margin-bottom:8px">{uploadMsg}</div>
-{/if}
-{#if uploadError}
-	<div class="alert alert-error" style="margin-bottom:8px">{uploadError}</div>
-{/if}
 
 <div class="cert-upload-grid">
 	<div class="form-group">

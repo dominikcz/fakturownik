@@ -48,7 +48,7 @@
 			{/if}
 		</div>
 		<div class="invoice-title">
-			<h1>FAKTURA VAT</h1>
+			<h1>FAKTURA</h1>
 			<div class="invoice-number">{invoice.number}</div>
 			{#if invoice.ksefNumber}
 				<div class="ksef-number">Nr KSeF: {invoice.ksefNumber}</div>
@@ -104,24 +104,24 @@
 	<table class="items-table">
 		<thead>
 			<tr>
-				<th class="th-lp">Lp.</th>
+				<th class="th-lp">L.p.</th>
 				<th class="th-desc">Nazwa towaru / usługi</th>
-				<th class="th-qty">Ilość</th>
 				<th class="th-unit">J.m.</th>
+				<th class="th-qty">Ilość</th>
 				<th class="th-price">Cena netto</th>
-				<th class="th-vat">VAT</th>
+				<th class="th-vat">VAT %</th>
 				<th class="th-net">Wartość netto</th>
-				<th class="th-vatamt">Kwota VAT</th>
+				<th class="th-vatamt">Wartość VAT</th>
 				<th class="th-gross">Wartość brutto</th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each invoice.items as item, idx}
-				<tr class:row-even={idx % 2 === 1}>
+				<tr class:row-even={settings.invoiceZebraStripes && idx % 2 === 1}>
 					<td class="td-center">{idx + 1}</td>
 					<td>{item.description}</td>
-					<td class="td-right">{item.quantity}</td>
 					<td class="td-center">{item.unit}</td>
+					<td class="td-right">{item.quantity}</td>
 					<td class="td-right">{fmt(item.unitPriceNet)}</td>
 					<td class="td-center">{vatRateLabels[item.vatRate] ?? item.vatRate}</td>
 					<td class="td-right">{fmt(item.netTotal)}</td>
@@ -130,41 +130,31 @@
 				</tr>
 			{/each}
 		</tbody>
+		<tfoot>
+			<!-- Podsumowanie per stawka VAT -->
+			{#each invoice.summary.byVatRate as row}
+				<tr class="vat-subtotal-row">
+					<td colspan="5" class="td-right vat-subtotal-empty"></td>
+					<td class="td-center vat-subtotal">{vatRateLabels[row.rate] ?? row.rate}</td>
+					<td class="td-right vat-subtotal">{fmt(row.net)}</td>
+					<td class="td-right vat-subtotal">{fmt(row.vat)}</td>
+					<td class="td-right vat-subtotal">{fmt(row.gross)}</td>
+				</tr>
+			{/each}
+			<!-- Wiersz Razem -->
+			<tr class="total-footer-row">
+				<td colspan="5" class="td-right total-footer-empty">Razem:</td>
+				<td class="total-footer-val"></td>
+				<td class="td-right total-footer-val">{fmt(invoice.summary.netTotal)}</td>
+				<td class="td-right total-footer-val">{fmt(invoice.summary.vatTotal)}</td>
+				<td class="td-right total-footer-val">{fmt(invoice.summary.grossTotal)}</td>
+			</tr>
+		</tfoot>
 	</table>
 
-	<!-- Podsumowanie VAT -->
+	<!-- Do zapłaty -->
 	<div class="summary-section">
-		<div class="vat-summary">
-			<h3>Podsumowanie VAT</h3>
-			<table class="vat-table">
-				<thead>
-					<tr>
-						<th>Stawka VAT</th>
-						<th>Netto</th>
-						<th>VAT</th>
-						<th>Brutto</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each invoice.summary.byVatRate as row}
-						<tr>
-							<td>{vatRateLabels[row.rate] ?? row.rate}</td>
-							<td class="td-right">{fmt(row.net)}</td>
-							<td class="td-right">{fmt(row.vat)}</td>
-							<td class="td-right">{fmt(row.gross)}</td>
-						</tr>
-					{/each}
-				</tbody>
-				<tfoot>
-					<tr class="total-row">
-						<th>RAZEM</th>
-						<th class="td-right">{fmt(invoice.summary.netTotal)}</th>
-						<th class="td-right">{fmt(invoice.summary.vatTotal)}</th>
-						<th class="td-right">{fmt(invoice.summary.grossTotal)}</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
+		<div></div>
 		<div class="total-box">
 			<div class="total-label">Do zapłaty:</div>
 			<div class="total-value">{fmt(invoice.summary.grossTotal)} PLN</div>
@@ -319,8 +309,8 @@
 
 	.items-table th {
 		padding: 8px 8px;
-		background: #1e293b;
-		color: #f1f5f9;
+		background: #ccc;
+		color: #000;
 		font-weight: 600;
 		font-size: 0.75rem;
 		text-align: left;
@@ -340,54 +330,45 @@
 	.td-right { text-align: right; font-variant-numeric: tabular-nums; }
 	.td-bold { font-weight: 600; }
 
+	/* VAT subtotal rows in tfoot */
+	.vat-subtotal-row td {
+		padding: 5px 8px;
+		font-size: 0.82rem;
+	}
+	.items-table .vat-subtotal-empty {
+		border: none;
+		background: transparent;
+	}
+	.vat-subtotal {
+		background: #f8fafc;
+		border-bottom: 1px solid #e2e8f0;
+		color: #374151;
+	}
+
+	/* Razem row */
+	.total-footer-row td {
+		padding: 7px 8px;
+		font-weight: 700;
+		font-size: 0.88rem;
+	}
+	.items-table .total-footer-empty {
+		border-top: none;
+		border-bottom: none;
+		background: transparent;
+		color: #1e293b;
+		font-weight: 700;
+	}
+	.total-footer-val {
+		background: #f1f5f9;
+		border-top: 2px solid #1e293b;
+		color: #1e293b;
+	}
+
 	/* Summary */
 	.summary-section {
 		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 20px;
+		justify-content: flex-end;
 		margin-bottom: 20px;
-	}
-
-	.vat-summary {
-		flex: 1;
-		max-width: 420px;
-	}
-
-	.vat-summary h3 {
-		font-size: 0.8rem;
-		font-weight: 700;
-		color: #64748b;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		margin-bottom: 8px;
-	}
-
-	.vat-table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.85rem;
-	}
-
-	.vat-table th,
-	.vat-table td {
-		padding: 6px 8px;
-		border-bottom: 1px solid #e2e8f0;
-		text-align: left;
-	}
-
-	.vat-table th {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: #64748b;
-		background: #f8fafc;
-	}
-
-	.total-row th {
-		background: #1e293b;
-		color: #f1f5f9;
-		border-bottom: none;
-		padding: 8px;
 	}
 
 	.total-box {

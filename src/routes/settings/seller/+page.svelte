@@ -1,28 +1,20 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
+	import { showError, showSuccess, showInfo } from '$lib/toast.js';
 	import type { Settings } from '$lib/types.js';
 
 	let { data }: { data: { settings: Settings } } = $props();
-	let settings = $state<Settings>(JSON.parse(JSON.stringify(data.settings)));
+	let settings = $state<Settings>(untrack(() => JSON.parse(JSON.stringify(data.settings))));
 
 	let saving = $state(false);
-	let successMsg = $state('');
-	let errorMsg = $state('');
 	let nipLooking = $state(false);
 	let nipLookupError = $state('');
-	let nipLookupToast = $state('');
-	let nipLookupToastTimer: ReturnType<typeof setTimeout>;
 
 	const sourceLabels: Record<string, string> = {
 		gus: 'GUS REGON BIR',
 		biala_lista: 'Białej Listy MF',
 		vies: 'VIES (UE)'
 	};
-
-	function showNipToast(source: string) {
-		nipLookupToast = `Dane uzupełnione z ${sourceLabels[source] ?? source}`;
-		clearTimeout(nipLookupToastTimer);
-		nipLookupToastTimer = setTimeout(() => (nipLookupToast = ''), 4000);
-	}
 
 	async function lookupSellerNip() {
 		const nip = settings.seller.nip?.replace(/\D/g, '');
@@ -40,7 +32,7 @@
 				settings.seller.address = d.address ?? settings.seller.address;
 				settings.seller.postalCode = d.postalCode ?? settings.seller.postalCode;
 				settings.seller.city = d.city ?? settings.seller.city;
-				if (d.source) showNipToast(d.source);
+				if (d.source) showInfo(`Dane uzupełnione z ${sourceLabels[d.source] ?? d.source}`);
 			} else {
 				nipLookupError = 'Nie znaleziono firmy o podanym NIP';
 			}
@@ -53,8 +45,6 @@
 
 	async function save() {
 		saving = true;
-		successMsg = '';
-		errorMsg = '';
 		try {
 			const res = await fetch('/api/settings', {
 				method: 'PUT',
@@ -63,25 +53,17 @@
 			});
 			if (!res.ok) {
 				const err = await res.json();
-				errorMsg = err.error ?? 'Błąd zapisu';
+				showError(err.error ?? 'Błąd zapisu');
 			} else {
-				successMsg = 'Ustawienia zostały zapisane.';
-				setTimeout(() => (successMsg = ''), 3000);
+				showSuccess('Ustawienia zostały zapisane.');
 			}
 		} catch {
-			errorMsg = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
 			saving = false;
 		}
 	}
 </script>
-
-{#if successMsg}
-	<div class="alert alert-success">{successMsg}</div>
-{/if}
-{#if errorMsg}
-	<div class="alert alert-error">{errorMsg}</div>
-{/if}
 
 <div class="page-actions">
 	<button class="btn btn-primary" onclick={save} disabled={saving}>
@@ -104,9 +86,6 @@
 		</div>
 		{#if nipLookupError}
 			<p class="field-error">{nipLookupError}</p>
-		{/if}
-		{#if nipLookupToast}
-			<p class="field-toast"><span class="mdi mdi-check-circle"></span> {nipLookupToast}</p>
 		{/if}
 	</div>
 	<div class="form-group col-2">

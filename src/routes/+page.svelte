@@ -101,7 +101,7 @@
 								</span>
 							</td>
 							<td>
-								<a href="/invoices/{invoice.id}" class="btn btn-sm btn-ghost">
+							<a href="/invoices/{invoice.id}" class="btn btn-sm btn-ghost" title="Podgląd">
 									<span class="mdi mdi-eye"></span>
 								</a>
 							</td>

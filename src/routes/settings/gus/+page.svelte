@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
+	import { showError, showSuccess } from '$lib/toast.js';
 	import type { Settings, NipLookupSource } from '$lib/types.js';
 
 	let { data }: { data: { settings: Settings } } = $props();
-	let settings = $state<Settings>(JSON.parse(JSON.stringify(data.settings)));
+	let settings = $state<Settings>(untrack(() => JSON.parse(JSON.stringify(data.settings))));
 
 	let saving = $state(false);
-	let successMsg = $state('');
-	let errorMsg = $state('');
 
 	const sourceInfo: Record<NipLookupSource, { label: string; desc: string; icon: string }> = {
 		gus: { label: 'GUS REGON BIR', desc: 'Wymaga klucza API', icon: 'mdi-database-search' },
@@ -16,8 +16,6 @@
 
 	async function save() {
 		saving = true;
-		successMsg = '';
-		errorMsg = '';
 		try {
 			const res = await fetch('/api/settings', {
 				method: 'PUT',
@@ -26,25 +24,17 @@
 			});
 			if (!res.ok) {
 				const err = await res.json();
-				errorMsg = err.error ?? 'Błąd zapisu';
+				showError(err.error ?? 'Błąd zapisu');
 			} else {
-				successMsg = 'Ustawienia zostały zapisane.';
-				setTimeout(() => (successMsg = ''), 3000);
+				showSuccess('Ustawienia zostały zapisane.');
 			}
 		} catch {
-			errorMsg = 'Błąd połączenia z serwerem';
+			showError('Błąd połączenia z serwerem');
 		} finally {
 			saving = false;
 		}
 	}
 </script>
-
-{#if successMsg}
-	<div class="alert alert-success">{successMsg}</div>
-{/if}
-{#if errorMsg}
-	<div class="alert alert-error">{errorMsg}</div>
-{/if}
 
 <div class="page-actions">
 	<button class="btn btn-primary" onclick={save} disabled={saving}>

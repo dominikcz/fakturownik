@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { NipLookupResult } from '$lib/types.js';
+	import { showInfo } from '$lib/toast.js';
 
 	interface Props {
 		nip: string;
@@ -10,20 +11,12 @@
 
 	let loading = $state(false);
 	let error = $state('');
-	let toast = $state('');
-	let toastTimer: ReturnType<typeof setTimeout>;
 
 	const sourceLabels: Record<string, string> = {
 		gus: 'GUS REGON BIR',
 		biala_lista: 'Białej Listy MF',
 		vies: 'VIES (UE)'
 	};
-
-	function showToast(msg: string) {
-		toast = msg;
-		clearTimeout(toastTimer);
-		toastTimer = setTimeout(() => (toast = ''), 4000);
-	}
 
 	async function lookup() {
 		const clean = nip.replace(/\D/g, '');
@@ -41,7 +34,7 @@
 				return;
 			}
 			const result: NipLookupResult = await res.json();
-			showToast(`Dane uzupełnione z ${sourceLabels[result.source] ?? result.source}`);
+			showInfo(`Dane uzupełnione z ${sourceLabels[result.source] ?? result.source}`);
 			onResult(result);
 		} catch {
 			error = 'Błąd połączenia z serwerem';
@@ -81,9 +74,6 @@
 	</div>
 	{#if error}
 		<p class="error">{error}</p>
-	{/if}
-	{#if toast}
-		<p class="toast"><span class="mdi mdi-check-circle"></span> {toast}</p>
 	{/if}
 </div>
 
@@ -149,12 +139,6 @@
 		color: #dc2626;
 		font-size: 0.8rem;
 	}
-	.toast {
-		display: flex; align-items: center; gap: 6px;
-		color: #15803d; font-size: 0.8rem;
-		animation: fadeIn 0.2s ease;
-	}
-	@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
 	@keyframes spin {
 		from {

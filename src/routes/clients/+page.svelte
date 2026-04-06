@@ -92,8 +92,7 @@
 									<button
 										class="btn btn-sm btn-danger"
 										onclick={() => deleteClient(client.id, client.name)}
-										disabled={deleting === client.id}
-									>
+										disabled={deleting === client.id}									title="Usuń kontrahenta"									>
 										<span class="mdi mdi-delete"></span>
 									</button>
 								</div>

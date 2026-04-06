@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS: Settings = {
 	},
 	invoiceNumberTemplate: 'x/m/rrrr',
 	defaultFont: 'Trebuchet MS',
+	invoiceZebraStripes: true,
 	ksef: {
 		environment: 'TEST',
 		nip: ''
@@ -65,6 +66,9 @@ export function getSettings(): Settings {
 	}
 	if (data.defaultPaymentDays == null) {
 		data.defaultPaymentDays = 14;
+	}
+	if (data.invoiceZebraStripes == null) {
+		data.invoiceZebraStripes = true;
 	}
 	return data;
 }
