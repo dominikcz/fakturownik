@@ -10,17 +10,19 @@
 		error?: string;
 	}
 
+	import { untrack } from 'svelte';
+
 	let { client = {}, onSave, saving = false, error = '' }: Props = $props();
 
-	let nip = $state(client.nip ?? '');
-	let name = $state(client.name ?? '');
-	let address = $state(client.address ?? '');
-	let city = $state(client.city ?? '');
-	let postalCode = $state(client.postalCode ?? '');
-	let country = $state(client.country ?? 'PL');
-	let email = $state(client.email ?? '');
-	let phone = $state(client.phone ?? '');
-	let nipEu = $state(client.nipEu ?? '');
+	let nip = $state(untrack(() => client.nip ?? ''));
+	let name = $state(untrack(() => client.name ?? ''));
+	let address = $state(untrack(() => client.address ?? ''));
+	let city = $state(untrack(() => client.city ?? ''));
+	let postalCode = $state(untrack(() => client.postalCode ?? ''));
+	let country = $state(untrack(() => client.country ?? 'PL'));
+	let email = $state(untrack(() => client.email ?? ''));
+	let phone = $state(untrack(() => client.phone ?? ''));
+	let nipEu = $state(untrack(() => client.nipEu ?? ''));
 
 	function onNipResult(result: NipLookupResult) {
 		// nip celowo nie jest nadpisywany – zachowujemy format wpisany przez użytkownika
