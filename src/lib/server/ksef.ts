@@ -210,3 +210,56 @@ export async function fetchUpoForInvoice(
 	return { ksefNumber, upoXml };
 }
 
+export interface KsefInvoiceMeta {
+	ksefReferenceNumber: string;
+	invoiceNumber: string;
+	invoicingDate: string;
+	net: number;
+	vat: number;
+	gross: number;
+	buyerName: string;
+	buyerNip: string;
+	sellerName: string;
+	sellerNip: string;
+}
+
+export async function queryKsefInvoices(
+	settings: Settings,
+	dateFrom: string,
+	dateTo: string
+): Promise<KsefInvoiceMeta[]> {
+	const { ksef } = settings;
+	const nipContext = ksef.nip?.replace(/\D/g, '') || settings.seller.nip?.replace(/\D/g, '') || '';
+	const client = await createAuthenticatedClient({ ...ksef, nip: nipContext });
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const response = await client.invoices.queryInvoiceMetadata(
+		{
+			subjectType: 'subject1',
+			dateRange: {
+				dateType: 'InvoicingDate',
+				from: dateFrom,
+				to: dateTo
+			}
+		},
+		0,
+		100,
+		'Desc'
+	) as any;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const items: any[] = response?.invoices ?? response?.invoiceHeaderList ?? [];
+	return items.map((item: any) => ({
+		ksefReferenceNumber: item.ksefReferenceNumber ?? item.invoiceReferenceNumber ?? '',
+		invoiceNumber: item.invoiceNumber ?? item.number ?? '',
+		invoicingDate: item.invoicingDate ?? item.issueDate ?? '',
+		net: parseFloat(item.net ?? item.p15 ?? 0),
+		vat: parseFloat(item.vat ?? 0),
+		gross: parseFloat(item.gross ?? item.p16 ?? 0),
+		buyerName: item.subjectTo?.name ?? item.buyerName ?? '',
+		buyerNip: item.subjectTo?.issuedToIdentifier?.identifier ?? item.buyerNip ?? '',
+		sellerName: item.subjectBy?.name ?? item.sellerName ?? '',
+		sellerNip: item.subjectBy?.issuedToIdentifier?.identifier ?? item.sellerNip ?? '',
+	}));
+}
+

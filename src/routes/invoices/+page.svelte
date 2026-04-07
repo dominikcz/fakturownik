@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types.js';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data }: { data: PageData } = $props();
 
@@ -21,6 +22,7 @@
 	};
 
 	let searchQuery = $state('');
+	let deletingId = $state<string | null>(null);
 
 	const filteredInvoices = $derived(
 		data.invoices.filter(
@@ -34,14 +36,35 @@
 	function formatAmount(amount: number): string {
 		return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2 }).format(amount);
 	}
+
+	async function deleteInvoice(id: string, number: string) {
+		if (!confirm(`Czy na pewno chcesz usunąć fakturę ${number}? Tej operacji nie można cofnąć.`)) return;
+		deletingId = id;
+		try {
+			const res = await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
+			if (!res.ok) {
+				const body = await res.json().catch(() => ({}));
+				alert(body.error ?? 'Błąd podczas usuwania faktury.');
+			} else {
+				await invalidateAll();
+			}
+		} finally {
+			deletingId = null;
+		}
+	}
 </script>
 
 <div class="page">
 	<div class="page-header">
 		<h1 class="page-title">Faktury</h1>
-		<a href="/invoices/new" class="btn btn-primary">
-			<span class="mdi mdi-plus"></span> Nowa faktura
-		</a>
+		<div class="header-actions">
+			<a href="/invoices/ksef-import" class="btn btn-secondary">
+				<span class="mdi mdi-cloud-download-outline"></span> Import z KSeF
+			</a>
+			<a href="/invoices/new" class="btn btn-primary">
+				<span class="mdi mdi-plus"></span> Nowa faktura
+			</a>
+		</div>
 	</div>
 
 	<div class="toolbar">
@@ -99,6 +122,18 @@
 								</a>
 							<a href="/api/invoices/{invoice.id}/pdf" target="_blank" class="text-btn" title="Pobierz PDF">PDF</a>
 							<a href="/api/invoices/{invoice.id}/xml" class="text-btn" title="Pobierz XML (FA3)">XML</a>
+							<button
+								class="icon-btn icon-btn-danger"
+								title="Usuń fakturę"
+								onclick={() => deleteInvoice(invoice.id, invoice.number)}
+								disabled={deletingId === invoice.id}
+							>
+								{#if deletingId === invoice.id}
+									<span class="mdi mdi-loading mdi-spin"></span>
+								{:else}
+									<span class="mdi mdi-delete-outline"></span>
+								{/if}
+							</button>
 							</td>
 						</tr>
 					{/each}
@@ -118,6 +153,12 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 20px;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 8px;
+		align-items: center;
 	}
 
 	.page-title {
@@ -174,6 +215,16 @@
 
 	.btn-primary:hover {
 		background: #1d4ed8;
+	}
+
+	.btn-secondary {
+		background: #f1f5f9;
+		color: #374151;
+		border: 1px solid #e2e8f0;
+	}
+
+	.btn-secondary:hover {
+		background: #e2e8f0;
 	}
 
 	.table-wrap {
@@ -255,6 +306,11 @@
 	.icon-btn:hover {
 		background: #f1f5f9;
 		color: #2563eb;
+	}
+
+	.icon-btn-danger:hover {
+		background: #fee2e2;
+		color: #dc2626;
 	}
 
 

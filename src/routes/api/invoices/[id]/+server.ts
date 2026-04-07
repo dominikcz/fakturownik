@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { getInvoice, saveInvoice, listInvoices, getSettings } from '$lib/server/data.js';
+import { getInvoice, saveInvoice, listInvoices, getSettings, deleteInvoice } from '$lib/server/data.js';
 import {
 	formatInvoiceNumber,
 	getTemplatePeriod,
@@ -92,6 +92,18 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
 		saveInvoice(updated);
 		return json(updated);
+	} catch (err) {
+		return json({ error: String(err) }, { status: 500 });
+	}
+};
+
+export const DELETE: RequestHandler = ({ params }) => {
+	try {
+		const invoice = getInvoice(params.id);
+		if (!invoice) return json({ error: 'Nie znaleziono faktury' }, { status: 404 });
+		const deleted = deleteInvoice(params.id);
+		if (!deleted) return json({ error: 'Nie udało się usunąć faktury' }, { status: 500 });
+		return json({ ok: true });
 	} catch (err) {
 		return json({ error: String(err) }, { status: 500 });
 	}

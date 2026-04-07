@@ -331,7 +331,7 @@
 	.td-bold   { font-weight: 600; }
 
 	.vat-subtotal-row td { padding: 5px 8px; font-size: 0.82rem; }
-	.vat-subtotal-empty  { border: none; background: transparent; }
+	td.vat-subtotal-empty  { border: none; background: transparent; }
 	.vat-subtotal {
 		background: #f8fafc;
 		border-bottom: 1px solid var(--inv-line-color, #e2e8f0);
@@ -339,7 +339,7 @@
 	}
 
 	.total-footer-row td { padding: 7px 8px; font-weight: 700; font-size: 0.88rem; }
-	.total-footer-empty {
+	td.total-footer-empty {
 		border-top: none;
 		border-bottom: none;
 		background: transparent;

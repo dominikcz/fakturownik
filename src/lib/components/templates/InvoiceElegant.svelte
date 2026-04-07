@@ -356,7 +356,7 @@
 	.td-bold   { font-weight: 600; }
 
 	.total-footer-row td { padding: 7px 8px; font-weight: 700; font-size: 0.88rem; }
-	.total-footer-empty {
+	td.total-footer-empty {
 		border-top: none;
 		border-bottom: none;
 		background: transparent;
