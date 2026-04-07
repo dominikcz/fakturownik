@@ -11,10 +11,15 @@ export const GET: RequestHandler = async ({ params }) => {
 		const settings = getSettings();
 		const pdfBuffer = await generateInvoicePdf(invoice, settings);
 
+		const date = new Date(invoice.issueDate);
+		const yyyy = date.getFullYear();
+		const mm = String(date.getMonth() + 1).padStart(2, '0');
+		const filename = `Faktura_${yyyy}-${mm}-${invoice.sequenceNumber}.pdf`;
+
 		return new Response(pdfBuffer.buffer as ArrayBuffer, {
 			headers: {
 				'Content-Type': 'application/pdf',
-				'Content-Disposition': `attachment; filename="faktura-${invoice.number.replace(/\//g, '-')}.pdf"`,
+				'Content-Disposition': `attachment; filename="${filename}"`,
 				'Content-Length': String(pdfBuffer.length)
 			}
 		});

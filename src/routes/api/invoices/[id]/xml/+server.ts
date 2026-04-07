@@ -8,7 +8,10 @@ export const GET: RequestHandler = ({ params }) => {
 	if (!invoice) error(404, 'Nie znaleziono faktury');
 
 	const xml = buildFa3Xml(invoice);
-	const filename = `faktura-${invoice.number.replace(/\//g, '-')}.xml`;
+	const date = new Date(invoice.issueDate);
+	const yyyy = date.getFullYear();
+	const mm = String(date.getMonth() + 1).padStart(2, '0');
+	const filename = `Faktura_${yyyy}-${mm}-${invoice.sequenceNumber}.xml`;
 
 	return new Response(xml, {
 		headers: {

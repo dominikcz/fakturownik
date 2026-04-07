@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { Invoice, Settings } from '$lib/types.js';
 	import { getTemplateConfig } from '$lib/invoiceTemplates.js';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		invoice: Invoice & { id?: string };
 		settings: Settings;
+		qrDataUrlOverride?: string;
 	}
 
-	let { invoice, settings }: Props = $props();
+	let { invoice, settings, qrDataUrlOverride }: Props = $props();
 
 	const tpl = $derived(getTemplateConfig(settings.invoiceTemplate));
 
@@ -30,10 +32,10 @@
 		return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 	}
 
-	let qrDataUrl = $state('');
+	let qrDataUrl = $state(untrack(() => qrDataUrlOverride ?? ''));
 
 	$effect(() => {
-		if (invoice.id) {
+		if (!qrDataUrlOverride && invoice.id) {
 			fetch(`/api/invoices/${invoice.id}/qr`)
 				.then((r) => (r.ok ? r.json() : null))
 				.then((data) => { if (data?.dataUrl) qrDataUrl = data.dataUrl; })
@@ -894,6 +896,10 @@
 		.invoice-preview {
 			border: none;
 			padding: 0;
+			max-width: none;
+			background: #fff;
+			display: inline-block;
+			width: 100%;
 		}
 	}
 
