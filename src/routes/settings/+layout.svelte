@@ -5,7 +5,7 @@
 
 	const tabs = [
 		{ href: '/settings/seller', label: 'Dane sprzedawcy', icon: 'mdi-domain' },
-		{ href: '/settings/invoicing', label: 'Fakturowanie', icon: 'mdi-file-document' },
+		{ href: '/settings/invoicing', label: 'Wystawianie faktur', icon: 'mdi-file-document' },
 		{ href: '/settings/ksef', label: 'KSeF', icon: 'mdi-cloud-upload' },
 		{ href: '/settings/gus', label: 'GUS REGON', icon: 'mdi-database-search' },
 		{ href: '/settings/appearance', label: 'Wygląd', icon: 'mdi-palette' }

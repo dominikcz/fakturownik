@@ -73,5 +73,5 @@
 <div class="form-group" style="max-width:200px">
 	<label for="paymentDays">Domyślny termin płatności (dni)</label>
 	<input id="paymentDays" type="number" min={0} max={365} bind:value={settings.defaultPaymentDays} class="inp" />
-	<p class="hint">Termin płatności = data wystawienia + ta liczba dni</p>
+	<p class="hint">Termin płatności = data wystawienia + {settings.defaultPaymentDays} dni</p>
 </div>
