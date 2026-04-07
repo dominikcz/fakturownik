@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Invoice, InvoiceItem, Client, Settings, VatRate, PaymentMethod } from '$lib/types.js';
+	import { untrack } from 'svelte';
 	import NipLookup from './NipLookup.svelte';
 	import type { NipLookupResult } from '$lib/types.js';
 
@@ -24,21 +25,22 @@
 		return d.toISOString().slice(0, 10);
 	}
 
-	const paymentDays = settings.defaultPaymentDays ?? 14;
+	const paymentDays = untrack(() => settings.defaultPaymentDays ?? 14);
 	const dueDateDefault = addDays(today, paymentDays);
 
 	// Pola nagłówkowe
-	let sequenceNumber = $state(invoice.sequenceNumber ?? settings.nextInvoiceNumber);
-	let issueDate = $state(invoice.issueDate ?? today);
-	let saleDate = $state(invoice.saleDate ?? today);
-	let paymentDueDate = $state(invoice.paymentDueDate ?? dueDateDefault);
-	let paymentMethod = $state<PaymentMethod>(invoice.paymentMethod ?? 'transfer');
-	let bankAccount = $state(formatIban(invoice.bankAccount ?? settings.seller.bankAccount ?? ''));
-	let comments = $state(invoice.comments ?? '');
-	let status = $state(invoice.status ?? 'draft');
+	let sequenceNumber = $state(untrack(() => invoice.sequenceNumber ?? settings.nextInvoiceNumber));
+	let issueDate = $state(untrack(() => invoice.issueDate ?? today));
+	let saleDate = $state(untrack(() => invoice.saleDate ?? today));
+	let paymentDueDate = $state(untrack(() => invoice.paymentDueDate ?? dueDateDefault));
+	let paymentMethod = $state<PaymentMethod>(untrack(() => invoice.paymentMethod ?? 'transfer'));
+	let bankAccount = $state(untrack(() => formatIban(invoice.bankAccount ?? settings.seller.bankAccount ?? '')));
+	let comments = $state(untrack(() => invoice.comments ?? ''));
+	let placeOfIssue = $state(untrack(() => invoice.placeOfIssue ?? settings.seller.city ?? ''));
+	let status = $state(untrack(() => invoice.status ?? 'draft'));
 
 	// Gdy zmienia się data wystawienia → aktualizuj datę sprzedaży (jeśli była równa) i termin płatności
-	let prevIssueDate = issueDate;
+	let prevIssueDate = untrack(() => issueDate);
 	$effect(() => {
 		if (issueDate !== prevIssueDate) {
 			if (saleDate === prevIssueDate) saleDate = issueDate;
@@ -66,19 +68,19 @@
 	}
 
 	// Dane nabywcy
-	let buyerNip = $state(invoice.buyer?.nip ?? '');
-	let buyerName = $state(invoice.buyer?.name ?? '');
-	let buyerAddress = $state(invoice.buyer?.address ?? '');
-	let buyerCity = $state(invoice.buyer?.city ?? '');
-	let buyerPostalCode = $state(invoice.buyer?.postalCode ?? '');
-	let buyerCountry = $state(invoice.buyer?.country ?? 'PL');
+	let buyerNip = $state(untrack(() => invoice.buyer?.nip ?? ''));
+	let buyerName = $state(untrack(() => invoice.buyer?.name ?? ''));
+	let buyerAddress = $state(untrack(() => invoice.buyer?.address ?? ''));
+	let buyerCity = $state(untrack(() => invoice.buyer?.city ?? ''));
+	let buyerPostalCode = $state(untrack(() => invoice.buyer?.postalCode ?? ''));
+	let buyerCountry = $state(untrack(() => invoice.buyer?.country ?? 'PL'));
 
 	// Pozycje faktury
-	let items = $state<InvoiceItem[]>(
+	let items = $state<InvoiceItem[]>(untrack(() =>
 		invoice.items?.length
 			? invoice.items.map((i) => ({ ...i }))
 			: [createEmptyItem()]
-	);
+	));
 
 	function createEmptyItem(): InvoiceItem {
 		return {
@@ -197,6 +199,7 @@
 			paymentMethod,
 			bankAccount: bankAccount || undefined,
 			comments: comments || undefined,
+			placeOfIssue: placeOfIssue || undefined,
 			status: status as Invoice['status'],
 			seller: {
 				nip: settings.seller.nip,
@@ -248,8 +251,8 @@
 					/>
 				</div>
 				<div class="form-group">
-					<label>Metoda płatności</label>
-					<select bind:value={paymentMethod} class="inp">
+					<label for="paymentMethod">Metoda płatności</label>
+					<select id="paymentMethod" bind:value={paymentMethod} class="inp">
 						<option value="transfer">Przelew</option>
 						<option value="cash">Gotówka</option>
 						<option value="card">Karta</option>
@@ -277,8 +280,8 @@
 				</div>
 			{/if}
 			<div class="form-group">
-				<label>Status</label>
-				<select bind:value={status} class="inp">
+				<label for="invoiceStatus">Status</label>
+				<select id="invoiceStatus" bind:value={status} class="inp">
 					<option value="draft">Szkic</option>
 					<option value="issued">Wystawiona</option>
 				</select>
@@ -307,7 +310,7 @@
 
 		{#if clients.length > 0}
 			<div class="form-group" style="margin-bottom:12px">
-				<label>Wybierz z listy kontrahentów</label>
+				<p class="form-sublabel">Wybierz z listy kontrahentów</p>
 				<div class="client-select-wrap">
 					<input
 						type="text"
@@ -336,7 +339,7 @@
 		{/if}
 
 		<div class="form-group">
-			<label>NIP nabywcy</label>
+			<p class="form-sublabel">NIP nabywcy</p>
 			<NipLookup bind:nip={buyerNip} onResult={onBuyerNipResult} />
 		</div>
 
@@ -400,20 +403,20 @@
 									required
 								/>
 							</td>
-							<td class="col-qty">
-								<input
-									type="number"
-									min="0.001"
-									step="any"
-									bind:value={item.quantity}
-									oninput={() => updateItem(idx, 'quantity', item.quantity)}
-									class="inp inp-cell inp-num"
-									required
-								/>
-							</td>
-							<td class="col-unit">
-								<input
-									type="text"
+						<td class="col-qty">
+							<input
+								type="number"
+								min={settings.integerQuantities ? 1 : 0}
+								step="1"
+								bind:value={item.quantity}
+								oninput={() => updateItem(idx, 'quantity', item.quantity)}
+								class="inp inp-cell inp-num"
+								required
+							/>
+						</td>
+						<td class="col-unit">
+							<input
+								type="text"
 									bind:value={item.unit}
 									class="inp inp-cell"
 									placeholder="szt."
@@ -505,8 +508,15 @@
 
 	<!-- Uwagi -->
 	<fieldset class="fieldset">
-		<legend>Uwagi (opcjonalne)</legend>
-		<textarea bind:value={comments} class="inp" rows={3} placeholder="Dodatkowe informacje…"></textarea>
+		<legend>Dodatkowe informacje</legend>
+		<div class="form-group">
+			<label for="placeOfIssue">Miejsce wystawienia</label>
+			<input id="placeOfIssue" type="text" bind:value={placeOfIssue} class="inp" placeholder="np. Kraków" style="max-width:220px" />
+		</div>
+		<div class="form-group">
+			<label for="comments">Uwagi</label>
+			<textarea id="comments" bind:value={comments} class="inp" rows={3} placeholder="Dodatkowe informacje…"></textarea>
+		</div>
 	</fieldset>
 
 	<!-- Akcje -->
@@ -687,7 +697,7 @@
 
 	.col-lp { width: 36px; }
 	.col-desc { min-width: 200px; }
-	.col-qty { width: 70px; }
+	.col-qty { width: 90px; }
 	.col-unit { width: 60px; }
 	.col-price { width: 90px; }
 	.col-vat { width: 70px; }
@@ -707,6 +717,13 @@
 
 	.td-center { text-align: center; }
 	.td-right { text-align: right; font-variant-numeric: tabular-nums; }
+
+	.form-sublabel {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		margin-bottom: 4px;
+	}
 
 	.del-btn {
 		background: transparent;

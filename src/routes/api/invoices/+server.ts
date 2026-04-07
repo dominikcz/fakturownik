@@ -82,6 +82,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			items: body.items ?? [],
 			summary: body.summary ?? { netTotal: 0, vatTotal: 0, grossTotal: 0, byVatRate: [] },
 			comments: body.comments,
+			placeOfIssue: body.placeOfIssue,
 			status: body.status ?? 'draft',
 			createdAt: now,
 			updatedAt: now

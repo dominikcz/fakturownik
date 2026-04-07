@@ -31,6 +31,9 @@ export interface Settings {
 	invoiceNumberTemplate: string;
 	defaultFont: string;
 	invoiceZebraStripes: boolean;
+	invoiceTemplate: string;
+	integerQuantities: boolean;
+	showItemColumns: boolean;
 	ksef: KsefSettings;
 	nextInvoiceNumber: number;
 	defaultPaymentDays: number;
@@ -112,6 +115,7 @@ export interface Invoice {
 	items: InvoiceItem[];
 	summary: InvoiceSummary;
 	comments?: string;
+	placeOfIssue?: string;
 	status: InvoiceStatus;
 	ksefNumber?: string;
 	ksefSessionRef?: string;

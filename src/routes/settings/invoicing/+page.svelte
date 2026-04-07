@@ -75,3 +75,22 @@
 	<input id="paymentDays" type="number" min={0} max={365} bind:value={settings.defaultPaymentDays} class="inp" />
 	<p class="hint">Termin płatności = data wystawienia + {settings.defaultPaymentDays} dni</p>
 </div>
+
+<div class="form-group" style="margin-top:16px">
+	<label class="checkbox-label">
+		<input type="checkbox" bind:checked={settings.integerQuantities} />
+		Ilości tylko całkowite (krok = 1)
+	</label>
+	<p class="hint">Gdy włączone, pole ilości używa kroku 1 zamiast 0.001.</p>
+</div>
+
+<style>
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9rem;
+		color: #374151;
+		cursor: pointer;
+	}
+</style>

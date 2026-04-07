@@ -44,6 +44,9 @@ const DEFAULT_SETTINGS: Settings = {
 	invoiceNumberTemplate: 'x/m/rrrr',
 	defaultFont: 'Trebuchet MS',
 	invoiceZebraStripes: true,
+	invoiceTemplate: 'klasyczny',
+	integerQuantities: false,
+	showItemColumns: true,
 	ksef: {
 		environment: 'TEST',
 		nip: ''
@@ -69,6 +72,15 @@ export function getSettings(): Settings {
 	}
 	if (data.invoiceZebraStripes == null) {
 		data.invoiceZebraStripes = true;
+	}
+	if (!data.invoiceTemplate) {
+		data.invoiceTemplate = 'klasyczny';
+	}
+	if (data.integerQuantities == null) {
+		data.integerQuantities = false;
+	}
+	if (data.showItemColumns == null) {
+		data.showItemColumns = true;
 	}
 	return data;
 }
