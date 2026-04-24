@@ -47,6 +47,7 @@
 	"dependencies": {
 		"@ksefuj/validator": "^0.3.0",
 		"@zerodevx/svelte-toast": "^0.9.6",
+		"bir1": "^4.2.0",
 		"ksef-client": "^0.5.2",
 		"node-forge": "^1.4.0",
 		"qrcode": "^1.5.4",

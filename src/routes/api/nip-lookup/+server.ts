@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
 import type { NipLookupResult, NipLookupSource } from '$lib/types.js';
 import { getSettings } from '$lib/server/data.js';
+import Bir from 'bir1';
 
 // --- helpers ---------------------------------------------------------------
 
@@ -17,112 +18,29 @@ function parseAddress(raw: string): { address: string; postalCode: string; city:
 	return { address: raw, postalCode: '', city: '' };
 }
 
-/** Wyciąga wartość najprostszego tagu XML (bez atrybutów zagnieżdżonych) */
-function xmlTag(xml: string, tag: string): string {
-	const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
-	return match ? match[1].trim() : '';
-}
-
 // --- GUS REGON BIR ---------------------------------------------------------
 
 async function lookupViaRegonBir(nip: string, apiKey: string): Promise<Omit<NipLookupResult, 'source'> | null> {
-	const isTestKey = apiKey === 'abcde12345abcde12345';
-	const baseUrl = isTestKey
-		? 'https://wyszukiwarkaregontest.stat.gov.pl/wsBIR/UslugaBIRzewnPubl.svc'
-		: 'https://wyszukiwarkaregon.stat.gov.pl/wsBIR/UslugaBIRzewnPubl.svc';
+	const bir = new Bir({ key: apiKey });
+	const result = await bir.search({ nip });
+	if (!result?.Nazwa) return null;
 
-	// 1. Logowanie → SID
-	const loginBody = `<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://CIS/BIR/PUBL/2014/07">
-  <soap:Body>
-    <ns:Zaloguj><ns:pKluczUzytkownika>${apiKey}</ns:pKluczUzytkownika></ns:Zaloguj>
-  </soap:Body>
-</soap:Envelope>`;
+	let address = result.Ulica || result.Miejscowosc || '';
+	if (result.NrNieruchomosci) address += ` ${result.NrNieruchomosci}`;
+	if (result.NrLokalu) address += `/${result.NrLokalu}`;
 
-	const loginRes = await fetch(baseUrl, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'text/xml;charset=UTF-8',
-			SOAPAction: '"http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/Zaloguj"'
-		},
-		body: loginBody,
-		signal: AbortSignal.timeout(10000)
-	});
-	if (!loginRes.ok) return null;
-
-	const loginXml = await loginRes.text();
-	const sid = xmlTag(loginXml, 'ZalogujResult');
-	if (!sid) return null;
-
-	const setCookie = loginRes.headers.get('set-cookie') ?? '';
-	const sessionMatch = setCookie.match(/ASP\.NET_SessionId=([^;]+)/);
-	const cookie = sessionMatch ? `ASP.NET_SessionId=${sessionMatch[1]}` : '';
-
-	// 2. Wyszukaj po NIP
-	const searchBody = `<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:ns="http://CIS/BIR/PUBL/2014/07"
-  xmlns:dat="http://CIS/BIR/PUBL/2014/07/DataContract">
-  <soap:Header>
-    <dat:ZalogujResult>${sid}</dat:ZalogujResult>
-  </soap:Header>
-  <soap:Body>
-    <ns:DaneSzukajPodmioty>
-      <ns:pParametryWyszukiwania>
-        <dat:Krs></dat:Krs><dat:Krsy></dat:Krsy>
-        <dat:Nip>${nip}</dat:Nip><dat:Nipy></dat:Nipy>
-        <dat:Regon></dat:Regon><dat:Regony9zn></dat:Regony9zn><dat:Regony14zn></dat:Regony14zn>
-      </ns:pParametryWyszukiwania>
-    </ns:DaneSzukajPodmioty>
-  </soap:Body>
-</soap:Envelope>`;
-
-	const searchHeaders: Record<string, string> = {
-		'Content-Type': 'text/xml;charset=UTF-8',
-		SOAPAction: '"http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DaneSzukajPodmioty"'
-	};
-	if (cookie) searchHeaders['Cookie'] = cookie;
-
-	const searchRes = await fetch(baseUrl, {
-		method: 'POST',
-		headers: searchHeaders,
-		body: searchBody,
-		signal: AbortSignal.timeout(10000)
-	});
-	if (!searchRes.ok) return null;
-
-	const searchXml = await searchRes.text();
-	const encodedResult = xmlTag(searchXml, 'DaneSzukajPodmiotyResult');
-	if (!encodedResult) return null;
-
-	// Wynik jest XML-em zakodowanym jako encje HTML wewnątrz SOAP
-	const innerXml = encodedResult
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&amp;/g, '&')
-		.replace(/&quot;/g, '"')
-		.replace(/&apos;/g, "'");
-
-	const nazwa = xmlTag(innerXml, 'Nazwa');
-	if (!nazwa) return null;
-
-	const kodPocztowy = xmlTag(innerXml, 'KodPocztowy');
-	const miejscowosc = xmlTag(innerXml, 'Miejscowosc');
-	const ulica = xmlTag(innerXml, 'Ulica');
-	const nrNieruchomosci = xmlTag(innerXml, 'NrNieruchomosci');
-	const nrLokalu = xmlTag(innerXml, 'NrLokalu');
-
-	let address = ulica || miejscowosc;
-	if (nrNieruchomosci) address += ` ${nrNieruchomosci}`;
-	if (nrLokalu) address += `/${nrLokalu}`;
-
-	// Normalizuj kod pocztowy: "12345" → "12-345"
+	const raw = result.KodPocztowy ?? '';
 	const postalCode =
-		kodPocztowy.length === 5 && !kodPocztowy.includes('-')
-			? `${kodPocztowy.slice(0, 2)}-${kodPocztowy.slice(2)}`
-			: kodPocztowy;
+		raw.length === 5 && !raw.includes('-') ? `${raw.slice(0, 2)}-${raw.slice(2)}` : raw;
 
-	return { nip, name: nazwa, address, postalCode, city: miejscowosc, country: 'PL' } as Omit<NipLookupResult, 'source'>;
+	return {
+		nip,
+		name: result.Nazwa,
+		address,
+		postalCode,
+		city: result.Miejscowosc ?? '',
+		country: 'PL'
+	};
 }
 
 // --- Biala Lista ------------------------------------------------------------
