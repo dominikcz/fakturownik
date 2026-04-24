@@ -65,6 +65,9 @@
 			<div class="party-info">{invoice.seller.address}</div>
 			<div class="party-info">{invoice.seller.postalCode} {invoice.seller.city}</div>
 			<div class="party-info">NIP: {invoice.seller.nip}</div>
+			{#if invoice.bankAccount}
+				<div class="party-info">Nr konta: {invoice.bankAccount}</div>
+			{/if}
 		</div>
 		<div class="party">
 			<h3 class="party-title">Nabywca</h3>
@@ -131,8 +134,7 @@
 				</tr>
 			{/each}
 			<tr class="total-footer-row">
-				<td colspan={settings.showItemColumns !== false ? 5 : 2} class="total-footer-empty"></td>
-				<td class="td-right total-footer-val">Razem:</td>
+				<td colspan={settings.showItemColumns !== false ? 6 : 3} class="td-right total-footer-empty total-footer-label">Razem:</td>
 				<td class="td-right total-footer-val">{fmt(invoice.summary.netTotal)}</td>
 				<td class="td-right total-footer-val">{fmt(invoice.summary.vatTotal)}</td>
 				<td class="td-right total-footer-val">{fmt(invoice.summary.grossTotal)}</td>
