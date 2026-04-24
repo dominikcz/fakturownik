@@ -10,28 +10,33 @@
 		invoice: Invoice & { id?: string };
 		settings: Settings;
 		qrDataUrlOverride?: string;
+		ksefVerificationUrlOverride?: string;
 	}
 
-	let { invoice, settings, qrDataUrlOverride }: Props = $props();
+	let { invoice, settings, qrDataUrlOverride, ksefVerificationUrlOverride }: Props = $props();
 
 	const tpl = $derived(getTemplateConfig(settings.invoiceTemplate));
 
 	let qrDataUrl = $state(untrack(() => qrDataUrlOverride ?? ''));
+	let ksefVerificationUrl = $state(untrack(() => ksefVerificationUrlOverride ?? ''));
 
 	$effect(() => {
 		if (!qrDataUrlOverride && invoice.id) {
 			fetch(`/api/invoices/${invoice.id}/qr`)
 				.then((r) => (r.ok ? r.json() : null))
-				.then((data) => { if (data?.dataUrl) qrDataUrl = data.dataUrl; })
+				.then((data) => {
+					if (data?.dataUrl) qrDataUrl = data.dataUrl;
+					if (data?.verificationUrl) ksefVerificationUrl = data.verificationUrl;
+				})
 				.catch(() => {});
 		}
 	});
 </script>
 
 {#if tpl.layout === 'modern'}
-	<InvoiceModern {invoice} {settings} {tpl} {qrDataUrl} />
+	<InvoiceModern {invoice} {settings} {tpl} {qrDataUrl} {ksefVerificationUrl} />
 {:else if tpl.layout === 'elegant'}
-	<InvoiceElegant {invoice} {settings} {tpl} {qrDataUrl} />
+	<InvoiceElegant {invoice} {settings} {tpl} {qrDataUrl} {ksefVerificationUrl} />
 {:else}
-	<InvoiceClassic {invoice} {settings} {tpl} {qrDataUrl} />
+	<InvoiceClassic {invoice} {settings} {tpl} {qrDataUrl} {ksefVerificationUrl} />
 {/if}

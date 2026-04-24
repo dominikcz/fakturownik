@@ -8,9 +8,10 @@
 		settings: Settings;
 		tpl: InvoiceTemplateConfig;
 		qrDataUrl: string;
+		ksefVerificationUrl?: string;
 	}
 
-	let { invoice, settings, tpl, qrDataUrl }: Props = $props();
+	let { invoice, settings, tpl, qrDataUrl, ksefVerificationUrl }: Props = $props();
 </script>
 
 <div class="invoice-preview"
@@ -170,6 +171,9 @@
 		<div class="qr-section">
 			<img src={qrDataUrl} alt="Kod QR faktury" class="qr-img" />
 			<div class="qr-label">{invoice.ksefNumber ? 'Weryfikacja KSeF' : 'Dane faktury'}</div>
+			{#if ksefVerificationUrl}
+				<a href={ksefVerificationUrl} class="ksef-verify-link" target="_blank" rel="noopener noreferrer">{ksefVerificationUrl}</a>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -313,15 +317,15 @@
 		table-layout: fixed;
 	}
 
-	.th-lp    { width: 30px; }
+	.th-lp    { width: 28px; }
 	.th-desc  { width: auto; }
-	.th-unit  { width: 80px; }
-	.th-qty   { width: 80px; }
-	.th-price { width: 90px; }
-	.th-vat   { width: 80px; }
-	.th-net   { width: 90px; }
-	.th-vatamt{ width: 90px; }
-	.th-gross { width: 90px; }
+	.th-unit  { width: 44px; }
+	.th-qty   { width: 44px; }
+	.th-price { width: 80px; }
+	.th-vat   { width: 44px; }
+	.th-net   { width: 80px; }
+	.th-vatamt{ width: 72px; }
+	.th-gross { width: 84px; }
 
 	.items-table th {
 		padding: 8px;
@@ -339,8 +343,8 @@
 	}
 
 	.row-even td { background: #f8fafc; }
-	.td-center { text-align: center; }
-	.td-right  { text-align: right; font-variant-numeric: lining-nums; }
+	.td-center { text-align: center; white-space: nowrap; }
+	.td-right  { text-align: right; font-variant-numeric: lining-nums; white-space: nowrap; }
 	.td-bold   { font-weight: 600; }
 
 	.vat-subtotal-row td { padding: 5px 8px; font-size: 0.82rem; }
@@ -499,6 +503,14 @@
 		color: #94a3b8;
 		text-align: center;
 		width: 80px;
+	}
+
+	.ksef-verify-link {
+		font-size: 0.65rem;
+		color: var(--inv-accent, #3b82f6);
+		text-align: center;
+		word-break: break-all;
+		max-width: 200px;
 	}
 
 	@media print {

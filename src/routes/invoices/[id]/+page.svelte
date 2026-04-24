@@ -102,6 +102,16 @@
 				>
 					{statusLabels[invoice.status] ?? invoice.status}
 				</span>
+				{#if data.ksefVerificationUrl}
+					<a
+						href={data.ksefVerificationUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="ksef-verify-link"
+					>
+						<span class="mdi mdi-check-decagram"></span> Zweryfikuj w KSeF
+					</a>
+				{/if}
 			</div>
 			<div class="actions">
 				<a href="/invoices/{invoice.id}/edit" class="btn btn-ghost">
@@ -223,6 +233,20 @@
 		font-weight: 700;
 		color: #1e293b;
 		margin-bottom: 6px;
+	}
+
+	.ksef-verify-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		margin-top: 6px;
+		font-size: 0.8rem;
+		color: #059669;
+		text-decoration: none;
+	}
+
+	.ksef-verify-link:hover {
+		text-decoration: underline;
 	}
 
 	.actions {

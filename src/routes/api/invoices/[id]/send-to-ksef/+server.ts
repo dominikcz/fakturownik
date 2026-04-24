@@ -17,6 +17,7 @@ export const POST: RequestHandler = async ({ params }) => {
 			status: 'ksef_pending_upo' as const,
 			ksefSessionRef: result.sessionRef,
 			ksefInvoiceRef: result.invoiceRef,
+			ksefInvoiceHash: result.invoiceHash,
 			updatedAt: new Date().toISOString()
 		};
 		saveInvoice(updated);

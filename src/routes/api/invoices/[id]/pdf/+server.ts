@@ -1,15 +1,14 @@
-import { getInvoice, getSettings } from '$lib/server/data.js';
+import { getInvoice } from '$lib/server/data.js';
 import { generateInvoicePdf } from '$lib/server/pdf.js';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, url }) => {
 	try {
 		const invoice = getInvoice(params.id);
 		if (!invoice) return json({ error: 'Nie znaleziono faktury' }, { status: 404 });
 
-		const settings = getSettings();
-		const pdfBuffer = await generateInvoicePdf(invoice, settings);
+		const pdfBuffer = await generateInvoicePdf(params.id, url.origin);
 
 		const date = new Date(invoice.issueDate);
 		const yyyy = date.getFullYear();

@@ -120,6 +120,7 @@ export interface Invoice {
 	ksefNumber?: string;
 	ksefSessionRef?: string;
 	ksefInvoiceRef?: string;
+	ksefInvoiceHash?: string;
 	upoXml?: string;
 	ksefErrorMessage?: string;
 	createdAt: string;

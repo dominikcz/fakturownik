@@ -120,6 +120,9 @@
 								<a href="/invoices/{invoice.id}/edit" class="icon-btn" title="Edytuj">
 									<span class="mdi mdi-pencil"></span>
 								</a>
+								<a href="/invoices/new?copyFrom={invoice.id}" class="icon-btn" title="Wystaw podobną">
+									<span class="mdi mdi-content-copy"></span>
+								</a>
 							<a href="/api/invoices/{invoice.id}/pdf" target="_blank" class="text-btn" title="Pobierz PDF">PDF</a>
 							<a href="/api/invoices/{invoice.id}/xml" class="text-btn" title="Pobierz XML (FA3)">XML</a>
 							<button

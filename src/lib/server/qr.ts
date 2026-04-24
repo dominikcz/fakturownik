@@ -10,6 +10,22 @@ const QR_URLS: Record<string, string> = {
 };
 
 /**
+ * Zwraca URL do weryfikacji faktury w KSeF (tylko dla faktur z numerem KSeF).
+ */
+export function buildKsefVerificationUrl(invoice: Invoice, settings: Settings): string | null {
+	if (!invoice.ksefNumber) return null;
+	const env = settings.ksef?.environment ?? 'PRD';
+	const baseQrUrl = QR_URLS[env] ?? QR_URLS.PRD;
+	const client = new KsefClient({ environment: env as 'TEST' | 'DEMO' | 'PRD', baseQrUrl });
+	const nip = (invoice.seller.nip ?? settings.seller.nip).replace(/\D/g, '');
+	const invoiceHash = invoice.ksefInvoiceHash
+		?? (() => { const xml = buildFa3Xml(invoice); return createHash('sha256').update(xml, 'utf8').digest('base64url'); })();
+	const [y, m, d] = invoice.issueDate.split('-');
+	const issueDateDMY = `${d}-${m}-${y}`;
+	return client.verificationLinks.buildInvoiceVerificationUrl(nip, issueDateDMY, invoiceHash);
+}
+
+/**
  * Generuje data URL (base64 PNG) kodu QR dla faktury.
  * Dla faktur z numerem KSeF — link weryfikacyjny MF.
  * Dla pozostałych — podstawowe dane faktury.
@@ -27,11 +43,13 @@ export async function generateInvoiceQrDataUrl(
 	if (invoice.ksefNumber) {
 		// Faktura przyjęta przez KSeF — generuj link weryfikacyjny
 		const nip = (invoice.seller.nip ?? settings.seller.nip).replace(/\D/g, '');
-		const xmlString = buildFa3Xml(invoice);
-		const invoiceHash = createHash('sha256').update(xmlString, 'utf8').digest('hex');
+		const invoiceHash = invoice.ksefInvoiceHash
+			?? (() => { const xml = buildFa3Xml(invoice); return createHash('sha256').update(xml, 'utf8').digest('base64url'); })();
+		const [y, m, d] = invoice.issueDate.split('-');
+		const issueDateDMY = `${d}-${m}-${y}`;
 		qrValue = client.verificationLinks.buildInvoiceVerificationUrl(
 			nip,
-			invoice.issueDate,
+			issueDateDMY,
 			invoiceHash
 		);
 	} else {

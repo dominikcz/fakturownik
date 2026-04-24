@@ -1,5 +1,6 @@
 import { KsefClient, XadesKeyPair, serializeInvoiceXml } from 'ksef-client';
 import { validate } from '@ksefuj/validator';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import type { Invoice } from '$lib/types.js';
 import type { Settings } from '$lib/types.js';
@@ -22,6 +23,7 @@ export class KsefValidationError extends Error {
 export interface KsefSendResult {
 	sessionRef: string;
 	invoiceRef: string;
+	invoiceHash: string;
 }
 
 export interface KsefUpoResult {
@@ -90,6 +92,7 @@ export async function sendInvoiceToKsef(
 	await validateInvoiceForKsef(invoice);
 
 	const xmlString = buildFa3Xml(invoice);
+	const invoiceHash = createHash('sha256').update(xmlString, 'utf8').digest('base64url');
 
 	const nipContext = ksef.nip?.replace(/\D/g, '') || settings.seller.nip?.replace(/\D/g, '') || '';
 	if (!nipContext) {
@@ -111,7 +114,8 @@ export async function sendInvoiceToKsef(
 
 		return {
 			sessionRef: session.referenceNumber,
-			invoiceRef: sendResult.referenceNumber
+			invoiceRef: sendResult.referenceNumber,
+			invoiceHash
 		};
 	} catch (err) {
 		await session.close().catch(() => {});
