@@ -1,4 +1,4 @@
-import { getSettings, getClients, getInvoice, listInvoices } from '$lib/server/data.js';
+import { getSettings, getClients, getInvoice, listInvoices, getCategories } from '$lib/server/data.js';
 import { getNextSequenceForPeriod } from '$lib/server/numeracja.js';
 import type { PageServerLoad } from './$types.js';
 import { error } from '@sveltejs/kit';
@@ -21,13 +21,17 @@ export const load: PageServerLoad = ({ url }) => {
 	if (copyFrom) {
 		const source = getInvoice(copyFrom);
 		if (!source) error(404, 'Nie znaleziono faktury źródłowej');
+		const today = new Date();
+		const dueDate = new Date(today);
+		dueDate.setDate(dueDate.getDate() + (settings.defaultPaymentDays ?? 14));
 		baseInvoice = {
 			...source,
 			id: undefined,
 			number: undefined,
 			sequenceNumber: nextSeq,
-			issueDate: new Date().toISOString().slice(0, 10),
-			saleDate: new Date().toISOString().slice(0, 10),
+			issueDate: today.toISOString().slice(0, 10),
+			saleDate: today.toISOString().slice(0, 10),
+			paymentDueDate: dueDate.toISOString().slice(0, 10),
 			status: 'draft' as const,
 			ksefNumber: undefined,
 			ksefSessionRef: undefined,
@@ -37,5 +41,5 @@ export const load: PageServerLoad = ({ url }) => {
 		};
 	}
 
-	return { settings: settingsWithNext, clients, baseInvoice };
+	return { settings: settingsWithNext, clients, baseInvoice, categories: getCategories() };
 };

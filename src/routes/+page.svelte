@@ -24,6 +24,10 @@
 	function formatAmount(amount: number): string {
 		return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2 }).format(amount);
 	}
+
+	const categoryMap = $derived(
+		Object.fromEntries(data.categories.map((c) => [c.id, c]))
+	);
 </script>
 
 <div class="page">
@@ -59,6 +63,37 @@
 			</div>
 		</div>
 	</div>
+
+	{#if data.categories.length > 0}
+		<div class="section-header">
+			<h2>Wartość faktur według kategorii</h2>
+			<a href="/settings/categories" class="btn btn-ghost btn-sm">Zarządzaj kategoriami →</a>
+		</div>
+		<div class="category-grid">
+			{#each data.categoryStats as cat}
+				<div class="category-card" style="border-left: 4px solid {cat.color}">
+					<div class="cat-header">
+						<span class="cat-symbol" style="background:{cat.color}18; color:{cat.color}">{cat.symbol}</span>
+						<span class="cat-name">{cat.name}</span>
+						<span class="cat-count">{cat.count} {cat.count === 1 ? 'faktura' : cat.count < 5 ? 'faktury' : 'faktur'}</span>
+					</div>
+					<div class="cat-amount">{formatAmount(cat.grossTotal)} zł</div>
+					<div class="cat-net">netto: {formatAmount(cat.netTotal)} zł</div>
+				</div>
+			{/each}
+			{#if data.uncategorized.count > 0}
+				<div class="category-card" style="border-left: 4px solid #d1d5db">
+					<div class="cat-header">
+						<span class="cat-symbol" style="background:#f3f4f6; color:#9ca3af">—</span>
+						<span class="cat-name" style="color:#6b7280">Bez kategorii</span>
+						<span class="cat-count">{data.uncategorized.count} {data.uncategorized.count === 1 ? 'faktura' : data.uncategorized.count < 5 ? 'faktury' : 'faktur'}</span>
+					</div>
+					<div class="cat-amount" style="color:#6b7280">{formatAmount(data.uncategorized.grossTotal)} zł</div>
+					<div class="cat-net">netto: {formatAmount(data.uncategorized.netTotal)} zł</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<div class="section-header">
 		<h2>Ostatnie faktury</h2>
@@ -99,6 +134,12 @@
 								>
 									{statusLabels[invoice.status] ?? invoice.status}
 								</span>
+								{#if invoice.categoryId && categoryMap[invoice.categoryId]}
+									{@const cat = categoryMap[invoice.categoryId]}
+									<span class="badge" style="background:{cat.color}18; color:{cat.color}; margin-left:4px">
+										{cat.symbol} {cat.name}
+									</span>
+								{/if}
 							</td>
 							<td>
 							<a href="/invoices/{invoice.id}" class="btn btn-sm btn-ghost" title="Podgląd">
@@ -291,5 +332,65 @@
 
 	.view-all a {
 		color: #2563eb;
+	}
+
+	.category-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 14px;
+		margin-bottom: 32px;
+	}
+
+	.category-card {
+		background: #fff;
+		border-radius: 8px;
+		padding: 14px 16px;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+	}
+
+	.cat-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 10px;
+	}
+
+	.cat-symbol {
+		font-size: 1rem;
+		min-width: 30px;
+		height: 30px;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+	}
+
+	.cat-name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #1e293b;
+		flex: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.cat-count {
+		font-size: 0.75rem;
+		color: #94a3b8;
+		white-space: nowrap;
+	}
+
+	.cat-amount {
+		font-size: 1.15rem;
+		font-weight: 700;
+		color: #1e293b;
+	}
+
+	.cat-net {
+		font-size: 0.78rem;
+		color: #94a3b8;
+		margin-top: 2px;
 	}
 </style>

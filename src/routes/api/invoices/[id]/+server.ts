@@ -25,6 +25,24 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		if (!invoice) return json({ error: 'Nie znaleziono faktury' }, { status: 404 });
 
 		const body = await request.json();
+
+		// Faktury wysłane do KSeF – można zmieniać tylko status i kategorię
+		// Blokada oparta na statusie LUB na obecności numeru KSeF (zabezpieczenie przed niespójnością statusu)
+		const ksefLocked = !!invoice.ksefNumber
+			|| invoice.status === 'sent_to_ksef'
+			|| invoice.status === 'ksef_pending_upo'
+			|| invoice.status === 'ksef_accepted';
+		if (ksefLocked) {
+			const updated = {
+				...invoice,
+				...(body.status !== undefined ? { status: body.status } : {}),
+				...(body.categoryId !== undefined ? { categoryId: body.categoryId } : {}),
+				updatedAt: new Date().toISOString()
+			};
+			saveInvoice(updated);
+			return json(updated);
+		}
+
 		const settings = getSettings();
 		const template = settings.invoiceNumberTemplate;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Invoice, InvoiceItem, Client, Settings, VatRate, PaymentMethod } from '$lib/types.js';
+	import type { Invoice, InvoiceItem, Client, Settings, VatRate, PaymentMethod, InvoiceCategory } from '$lib/types.js';
 	import { untrack } from 'svelte';
 	import NipLookup from './NipLookup.svelte';
 	import type { NipLookupResult } from '$lib/types.js';
@@ -8,6 +8,7 @@
 		invoice?: Partial<Invoice>;
 		settings: Settings;
 		clients: Client[];
+		categories?: InvoiceCategory[];
 		onSave: (invoice: Partial<Invoice>) => void | Promise<void>;
 		onError?: (msg: string) => void;
 		saving?: boolean;
@@ -15,7 +16,7 @@
 		cancelHref?: string;
 	}
 
-	let { invoice = {}, settings, clients, onSave, onError, saving = false, error = '', cancelHref = '/invoices' }: Props = $props();
+	let { invoice = {}, settings, clients, categories = [], onSave, onError, saving = false, error = '', cancelHref = '/invoices' }: Props = $props();
 
 	const today = new Date().toISOString().slice(0, 10);
 
@@ -38,6 +39,7 @@
 	let comments = $state(untrack(() => invoice.comments ?? ''));
 	let placeOfIssue = $state(untrack(() => invoice.placeOfIssue ?? settings.seller.city ?? ''));
 	let status = $state(untrack(() => invoice.status ?? 'draft'));
+	let categoryId = $state(untrack(() => invoice.categoryId ?? ''));
 
 	// Gdy zmienia się data wystawienia → aktualizuj datę sprzedaży (jeśli była równa) i termin płatności
 	let prevIssueDate = untrack(() => issueDate);
@@ -201,6 +203,7 @@
 			comments: comments || undefined,
 			placeOfIssue: placeOfIssue || undefined,
 			status: status as Invoice['status'],
+			categoryId: categoryId || undefined,
 			seller: {
 				nip: settings.seller.nip,
 				name: settings.seller.name,
@@ -286,6 +289,17 @@
 					<option value="issued">Wystawiona</option>
 				</select>
 			</div>
+			{#if categories.length > 0}
+				<div class="form-group">
+					<label for="invoiceCategory">Kategoria</label>
+					<select id="invoiceCategory" bind:value={categoryId} class="inp">
+						<option value="">— brak kategorii —</option>
+						{#each categories as cat}
+							<option value={cat.id}>{cat.symbol} {cat.name}</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
 		</fieldset>
 
 		<!-- Sprzedawca -->

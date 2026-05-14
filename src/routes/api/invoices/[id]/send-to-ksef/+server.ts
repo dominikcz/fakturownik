@@ -8,6 +8,10 @@ export const POST: RequestHandler = async ({ params }) => {
 	try {
 		const invoice = getInvoice(params.id);
 		if (!invoice) return json({ error: 'Nie znaleziono faktury' }, { status: 404 });
+		if (invoice.status === 'draft') return json({ error: 'Nie można wysłać szkicu do KSeF. Najpierw zmień status faktury na "Wystawiona".' }, { status: 422 });
+		if (invoice.status === 'sent_to_ksef' || invoice.status === 'ksef_pending_upo' || invoice.status === 'ksef_accepted') {
+			return json({ error: 'Faktura została już wysłana do KSeF.' }, { status: 422 });
+		}
 
 		const settings = getSettings();
 		const result = await sendInvoiceToKsef(invoice, settings);

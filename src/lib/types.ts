@@ -123,8 +123,16 @@ export interface Invoice {
 	ksefInvoiceHash?: string;
 	upoXml?: string;
 	ksefErrorMessage?: string;
+	categoryId?: string;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface InvoiceCategory {
+	id: string;
+	name: string;
+	color: string;
+	symbol: string;
 }
 
 export interface NipLookupResult {

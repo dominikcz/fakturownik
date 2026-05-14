@@ -50,6 +50,7 @@
 		invoice={data.baseInvoice}
 		settings={data.settings}
 		clients={data.clients}
+		categories={data.categories}
 		onSave={handleSave}
 		onError={(msg) => { errorMsg = msg; showError(msg); }}
 		error={errorMsg}

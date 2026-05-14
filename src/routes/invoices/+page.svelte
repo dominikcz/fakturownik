@@ -24,6 +24,10 @@
 	let searchQuery = $state('');
 	let deletingId = $state<string | null>(null);
 
+	const categoryMap = $derived(
+		Object.fromEntries(data.categories.map((c) => [c.id, c]))
+	);
+
 	const filteredInvoices = $derived(
 		data.invoices.filter(
 			(inv) =>
@@ -112,6 +116,12 @@
 								>
 									{statusLabels[invoice.status] ?? invoice.status}
 								</span>
+								{#if invoice.categoryId && categoryMap[invoice.categoryId]}
+									{@const cat = categoryMap[invoice.categoryId]}
+									<span class="badge" style="background:{cat.color}18; color:{cat.color}; margin-left:4px">
+										{cat.symbol} {cat.name}
+									</span>
+								{/if}
 							</td>
 							<td class="actions">
 								<a href="/invoices/{invoice.id}" class="icon-btn" title="Podgląd">

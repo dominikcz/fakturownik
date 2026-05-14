@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import type { Settings, Client, Invoice } from '$lib/types.js';
+import type { Settings, Client, Invoice, InvoiceCategory } from '$lib/types.js';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const INVOICES_DIR = path.join(DATA_DIR, 'invoices');
@@ -138,6 +138,19 @@ export function deleteInvoice(id: string): boolean {
 		return true;
 	}
 	return false;
+}
+
+// --- Categories ---------------------------------------------------------------
+
+const CATEGORIES_PATH = path.join(DATA_DIR, 'categories.json');
+
+export function getCategories(): InvoiceCategory[] {
+	ensureDir(DATA_DIR);
+	return readJson<InvoiceCategory[]>(CATEGORIES_PATH) ?? [];
+}
+
+export function saveCategories(categories: InvoiceCategory[]): void {
+	writeJson(CATEGORIES_PATH, categories);
 }
 
 export { DATA_DIR, INVOICES_DIR };

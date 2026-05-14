@@ -142,7 +142,7 @@
 				>
 					<span class="mdi mdi-code-tags"></span> XML
 				</a>
-				{#if invoice.status === 'draft' || invoice.status === 'issued' || invoice.status === 'ksef_error'}
+				{#if invoice.status === 'issued' || invoice.status === 'ksef_error'}
 					<button
 						class="btn btn-primary"
 						onclick={sendToKsef}
