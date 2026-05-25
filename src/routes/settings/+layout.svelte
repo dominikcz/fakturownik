@@ -38,21 +38,21 @@
 		display: flex; justify-content: space-between;
 		align-items: center; margin-bottom: 20px;
 	}
-	.page-title { font-size: 1.5rem; font-weight: 700; color: #111827; }
+	.page-title { font-size: 1.5rem; font-weight: 700; color: var(--clr-text); }
 
 	.settings-nav {
 		display: flex; gap: 4px;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid var(--clr-border);
 		margin-bottom: 24px;
 		flex-wrap: wrap;
 	}
 	.settings-tab {
 		display: flex; align-items: center; gap: 6px;
-		padding: 10px 16px; font-size: 0.9rem; color: #6b7280;
+		padding: 10px 16px; font-size: 0.9rem; color: var(--clr-text-muted);
 		border-bottom: 2px solid transparent; margin-bottom: -1px;
 		text-decoration: none; transition: color 0.15s;
 		font-family: inherit;
 	}
-	.settings-tab:hover { color: #374151; }
-	.settings-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+	.settings-tab:hover { color: var(--clr-text-2); }
+	.settings-tab.active { color: var(--clr-primary); border-bottom-color: var(--clr-primary); font-weight: 600; }
 </style>

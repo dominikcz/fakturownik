@@ -57,7 +57,7 @@ async function lookupViaBialaLista(nip: string): Promise<Omit<NipLookupResult, '
 	const subject = data?.result?.subject;
 	if (!subject) return null;
 
-	// Dla JDG residenceAddress to adres domowy – zawsze preferuj workingAddress
+	// Dla JDG residenceAddress to adres domowy - zawsze preferuj workingAddress
 	const rawAddress = subject.workingAddress ?? subject.residenceAddress ?? '';
 	const { address, postalCode, city } = parseAddress(rawAddress);
 	return { nip: subject.nip ?? nip, name: subject.name ?? '', address, postalCode, city, country: 'PL' };

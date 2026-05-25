@@ -72,17 +72,17 @@
 		align-items: center;
 		gap: 4px;
 		font-size: 0.85rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		margin-bottom: 8px;
 	}
 
 	.breadcrumb a {
-		color: #2563eb;
+		color: var(--clr-link);
 	}
 
 	.page-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--clr-text-heading);
 	}
 </style>

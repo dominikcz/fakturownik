@@ -98,16 +98,18 @@
 	.inp {
 		flex: 1;
 		padding: 8px 10px;
-		border: 1px solid #d1d5db;
+		border: 1px solid var(--clr-border-input);
 		border-radius: 6px;
 		font-size: 0.9rem;
 		outline: none;
 		transition: border-color 0.15s;
+		background: var(--clr-surface);
+		color: var(--clr-text);
 	}
 
 	.inp:focus {
-		border-color: #2563eb;
-		box-shadow: 0 0 0 2px #2563eb20;
+		border-color: var(--clr-primary);
+		box-shadow: 0 0 0 2px var(--clr-primary-ring);
 	}
 
 	.lookup-btn {
@@ -115,7 +117,7 @@
 		align-items: center;
 		gap: 6px;
 		padding: 8px 14px;
-		background: #2563eb;
+		background: var(--clr-primary);
 		color: #fff;
 		border: none;
 		border-radius: 6px;
@@ -127,7 +129,7 @@
 	}
 
 	.lookup-btn:hover:not(:disabled) {
-		background: #1d4ed8;
+		background: var(--clr-primary-hover);
 	}
 
 	.lookup-btn:disabled {
@@ -136,7 +138,7 @@
 	}
 
 	.error {
-		color: #dc2626;
+		color: var(--clr-danger);
 		font-size: 0.8rem;
 	}
 

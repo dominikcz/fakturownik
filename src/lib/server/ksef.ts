@@ -142,7 +142,7 @@ export async function fetchUpoForInvoice(
 	const { ksef } = settings;
 
 	if (!invoice.ksefSessionRef) {
-		throw new Error('Brak reference sesji KSeF – nie można pobrać UPO.');
+		throw new Error('Brak reference sesji KSeF - nie można pobrać UPO.');
 	}
 
 	const nipContext = ksef.nip?.replace(/\D/g, '') || settings.seller.nip?.replace(/\D/g, '') || '';

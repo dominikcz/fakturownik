@@ -43,7 +43,8 @@
 	</button>
 </div>
 
-<h2 class="section-title">GUS REGON BIR – klucz API</h2>
+<fieldset class="fieldset">
+<legend>GUS REGON BIR - klucz API</legend>
 
 <div class="form-group" style="max-width:500px">
 	<label for="regonApiKey">Klucz API GUS REGON BIR</label>
@@ -54,8 +55,10 @@
 		Zwraca nazwę firmy (dla JDG: pełną nazwę działalności) i adres siedziby.
 	</p>
 </div>
+</fieldset>
 
-<h2 class="section-title" style="margin-top:32px">Kolejność źródeł wyszukiwania NIP</h2>
+<fieldset class="fieldset">
+<legend>Kolejność źródeł wyszukiwania NIP</legend>
 <p class="hint" style="margin-bottom:12px">Użyj strzałek, aby ustawić kolejność. Pierwsze źródło, które zwróci dane, zostanie użyte.</p>
 
 <div class="order-list">
@@ -94,3 +97,4 @@
 		</div>
 	{/each}
 </div>
+</fieldset>

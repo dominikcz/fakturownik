@@ -66,7 +66,8 @@
 	</button>
 </div>
 
-<h2 class="section-title">Wygląd faktur</h2>
+<fieldset class="fieldset">
+<legend>Wygląd faktur</legend>
 
 <div class="form-group">
 	<p class="form-field-label">Szablon faktury</p>
@@ -168,6 +169,7 @@
 		<input type="file" accept="image/*" onchange={uploadLogo} disabled={logoUploading} hidden />
 	</label>
 </div>
+</fieldset>
 
 <style>
 	.template-grid {
@@ -177,8 +179,8 @@
 	}
 
 	.template-card {
-		background: #fff;
-		border: 2px solid #e2e8f0;
+		background: var(--clr-surface);
+		border: 2px solid var(--clr-border-mid);
 		border-radius: 10px;
 		padding: 10px;
 		cursor: pointer;
@@ -187,10 +189,10 @@
 		transition: border-color 0.15s, box-shadow 0.15s;
 	}
 
-	.template-card:hover { border-color: #94a3b8; }
+	.template-card:hover { border-color: var(--clr-text-faint); }
 	.template-card.selected {
-		border-color: #2563eb;
-		box-shadow: 0 0 0 3px #2563eb30;
+		border-color: var(--clr-primary);
+		box-shadow: 0 0 0 3px var(--clr-primary-ring);
 	}
 
 	.template-preview {
@@ -231,7 +233,7 @@
 	}
 	.tp-trow {
 		height: 5px;
-		background: #f1f5f9;
+		background: var(--clr-border-subtle);
 		border-radius: 1px;
 	}
 	.tp-bar {
@@ -265,7 +267,7 @@
 	}
 	.tp-party-box {
 		flex: 1;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--clr-border-mid);
 		border-radius: 2px;
 	}
 	.tp-box-right {
@@ -305,7 +307,7 @@
 	}
 	.tp-party {
 		flex: 1;
-		background: #f1f5f9;
+		background: var(--clr-border-subtle);
 		border-radius: 1px;
 	}
 	.tp-footer-2col {
@@ -334,14 +336,14 @@
 	/* Labels */
 	.template-name {
 		font-size: 0.8rem;
-		color: #1e293b;
+		color: var(--clr-text-heading);
 		font-weight: 600;
 		margin-top: 2px;
 	}
 
 	.template-font {
 		font-size: 0.7rem;
-		color: #94a3b8;
+		color: var(--clr-text-faint);
 		margin-top: 1px;
 	}
 
@@ -349,7 +351,7 @@
 		display: block;
 		font-size: 0.85rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--clr-text-2);
 		margin-bottom: 10px;
 	}
 	.checkbox-label {
@@ -357,13 +359,13 @@
 		align-items: center;
 		gap: 8px;
 		font-size: 0.9rem;
-		color: #374151;
+		color: var(--clr-text-2);
 		cursor: pointer;
 	}
 	.form-label {
 		font-size: 0.85rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--clr-text-2);
 		margin-bottom: 6px;
 	}
 </style>

@@ -72,7 +72,8 @@
 	</button>
 </div>
 
-<h2 class="section-title">Dane Twojej firmy</h2>
+<fieldset class="fieldset">
+<legend>Dane Twojej firmy</legend>
 
 <div class="form-grid">
 	<div class="form-group">
@@ -117,3 +118,4 @@
 		<input id="phone" type="tel" bind:value={settings.seller.phone} class="inp" />
 	</div>
 </div>
+</fieldset>

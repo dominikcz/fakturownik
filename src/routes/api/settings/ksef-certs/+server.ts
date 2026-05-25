@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 	} else {
-		// Klucz nie jest zaszyfrowany – walidacja że jest prawidłowy PEM
+		// Klucz nie jest zaszyfrowany - walidacja że jest prawidłowy PEM
 		try {
 			createPrivateKey({ key: keyRaw, format: 'pem' });
 			keyPem = keyRaw;

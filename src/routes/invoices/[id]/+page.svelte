@@ -213,12 +213,12 @@
 		align-items: center;
 		gap: 4px;
 		font-size: 0.85rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		margin-bottom: 8px;
 	}
 
 	.breadcrumb a {
-		color: #2563eb;
+		color: var(--clr-link);
 	}
 
 	.header-row {
@@ -231,7 +231,7 @@
 	.page-title {
 		font-size: 1.4rem;
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--clr-text-heading);
 		margin-bottom: 6px;
 	}
 
@@ -241,7 +241,7 @@
 		gap: 4px;
 		margin-top: 6px;
 		font-size: 0.8rem;
-		color: #059669;
+		color: var(--clr-success);
 		text-decoration: none;
 	}
 
@@ -271,12 +271,12 @@
 	}
 
 	.btn-primary {
-		background: #2563eb;
+		background: var(--clr-primary);
 		color: #fff;
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background: #1d4ed8;
+		background: var(--clr-primary-hover);
 	}
 
 	.btn-primary:disabled {
@@ -286,12 +286,12 @@
 
 	.btn-ghost {
 		background: transparent;
-		color: #374151;
-		border: 1px solid #d1d5db;
+		color: var(--clr-text-2);
+		border: 1px solid var(--clr-border-input);
 	}
 
 	.btn-ghost:hover {
-		background: #f8fafc;
+		background: var(--clr-surface-raised);
 	}
 
 	.badge {
@@ -303,9 +303,9 @@
 	}
 
 	.alert-error {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		color: #dc2626;
+		background: var(--clr-danger-bg);
+		border: 1px solid var(--clr-danger-border);
+		color: var(--clr-danger);
 		padding: 10px 14px;
 		border-radius: 6px;
 		font-size: 0.875rem;
@@ -319,8 +319,8 @@
 	.spin { animation: spin 0.8s linear infinite; }
 
 	.validation-errors {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
+		background: var(--clr-danger-bg);
+		border: 1px solid var(--clr-danger-border);
 		border-radius: 6px;
 		padding: 12px 16px;
 		margin-bottom: 16px;
@@ -331,7 +331,7 @@
 		gap: 6px;
 		font-weight: 600;
 		font-size: 0.9rem;
-		color: #dc2626;
+		color: var(--clr-danger);
 		margin-bottom: 10px;
 	}
 	.validation-errors-list {
@@ -346,11 +346,11 @@
 		align-items: baseline;
 		gap: 6px;
 		font-size: 0.85rem;
-		color: #7f1d1d;
+		color: var(--clr-danger-dark);
 	}
 	.issue-code {
 		font-family: monospace;
-		background: #fee2e2;
+		background: var(--clr-danger-hover-bg);
 		padding: 1px 6px;
 		border-radius: 4px;
 		font-size: 0.78rem;
@@ -359,7 +359,7 @@
 	}
 	.issue-el {
 		font-family: monospace;
-		color: #b91c1c;
+		color: var(--clr-danger);
 		font-size: 0.78rem;
 	}
 

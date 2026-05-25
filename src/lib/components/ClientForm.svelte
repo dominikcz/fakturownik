@@ -25,7 +25,7 @@
 	let nipEu = $state(untrack(() => client.nipEu ?? ''));
 
 	function onNipResult(result: NipLookupResult) {
-		// nip celowo nie jest nadpisywany – zachowujemy format wpisany przez użytkownika
+		// nip celowo nie jest nadpisywany - zachowujemy format wpisany przez użytkownika
 		name = result.name;
 		address = result.address;
 		city = result.city;
@@ -117,22 +117,6 @@
 		gap: 20px;
 	}
 
-	.fieldset {
-		border: 1px solid #e2e8f0;
-		border-radius: 8px;
-		padding: 16px;
-		background: #fff;
-	}
-
-	.fieldset legend {
-		font-size: 0.85rem;
-		font-weight: 600;
-		color: #64748b;
-		padding: 0 6px;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-	}
-
 	.form-group {
 		display: flex;
 		flex-direction: column;
@@ -158,22 +142,24 @@
 	label {
 		font-size: 0.8rem;
 		font-weight: 600;
-		color: #374151;
+		color: var(--clr-text-2);
 	}
 
 	.inp {
 		padding: 8px 10px;
-		border: 1px solid #d1d5db;
+		border: 1px solid var(--clr-border-input);
 		border-radius: 6px;
 		font-size: 0.9rem;
 		outline: none;
 		transition: border-color 0.15s;
 		width: 100%;
+		background: var(--clr-surface);
+		color: var(--clr-text);
 	}
 
 	.inp:focus {
-		border-color: #2563eb;
-		box-shadow: 0 0 0 2px #2563eb20;
+		border-color: var(--clr-primary);
+		box-shadow: 0 0 0 2px var(--clr-primary-ring);
 	}
 
 	.form-actions {
@@ -197,12 +183,12 @@
 	}
 
 	.btn-primary {
-		background: #2563eb;
+		background: var(--clr-primary);
 		color: #fff;
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background: #1d4ed8;
+		background: var(--clr-primary-hover);
 	}
 
 	.btn-primary:disabled {
@@ -212,18 +198,18 @@
 
 	.btn-ghost {
 		background: transparent;
-		color: #374151;
-		border: 1px solid #d1d5db;
+		color: var(--clr-text-2);
+		border: 1px solid var(--clr-border-input);
 	}
 
 	.btn-ghost:hover {
-		background: #f8fafc;
+		background: var(--clr-surface-raised);
 	}
 
 	.alert-error {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		color: #dc2626;
+		background: var(--clr-danger-bg);
+		border: 1px solid var(--clr-danger-border);
+		color: var(--clr-danger);
 		padding: 10px 14px;
 		border-radius: 6px;
 		font-size: 0.875rem;

@@ -26,7 +26,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
 		const body = await request.json();
 
-		// Faktury wysłane do KSeF – można zmieniać tylko status i kategorię
+		// Faktury wysłane do KSeF - można zmieniać tylko status i kategorię
 		// Blokada oparta na statusie LUB na obecności numeru KSeF (zabezpieczenie przed niespójnością statusu)
 		const ksefLocked = !!invoice.ksefNumber
 			|| invoice.status === 'sent_to_ksef'

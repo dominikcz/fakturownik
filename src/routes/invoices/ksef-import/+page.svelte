@@ -245,12 +245,12 @@
 		align-items: center;
 		gap: 4px;
 		font-size: 0.82rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		margin-bottom: 6px;
 	}
 
 	.breadcrumb-link {
-		color: #2563eb;
+		color: var(--clr-link);
 		text-decoration: none;
 	}
 
@@ -263,7 +263,7 @@
 	.page-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--clr-text-heading);
 	}
 
 	.env-badge {
@@ -275,13 +275,13 @@
 		margin-bottom: 16px;
 	}
 
-	.env-test  { background: #fef3c7; color: #92400e; }
-	.env-demo  { background: #dbeafe; color: #1e40af; }
-	.env-prd   { background: #dcfce7; color: #166534; }
+	.env-test  { background: var(--clr-cert-miss-bg); color: var(--clr-cert-miss-text); }
+	.env-demo  { background: var(--clr-primary-bg); color: var(--clr-primary); }
+	.env-prd   { background: var(--clr-cert-ok-bg); color: var(--clr-cert-ok-text); }
 
 	.filter-card {
-		background: #fff;
-		border: 1px solid #e2e8f0;
+		background: var(--clr-surface);
+		border: 1px solid var(--clr-border-mid);
 		border-radius: 10px;
 		padding: 20px;
 		margin-bottom: 20px;
@@ -303,21 +303,21 @@
 	.field label {
 		font-size: 0.8rem;
 		font-weight: 500;
-		color: #64748b;
+		color: var(--clr-text-muted);
 	}
 
 	.field input {
 		padding: 8px 10px;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--clr-border-mid);
 		border-radius: 6px;
 		font-size: 0.9rem;
-		color: #374151;
-		background: #fff;
+		color: var(--clr-text-2);
+		background: var(--clr-surface);
 	}
 
 	.field input:focus {
 		outline: none;
-		border-color: #2563eb;
+		border-color: var(--clr-primary);
 	}
 
 	.btn {
@@ -340,22 +340,22 @@
 	}
 
 	.btn-primary {
-		background: #2563eb;
+		background: var(--clr-primary);
 		color: #fff;
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background: #1d4ed8;
+		background: var(--clr-primary-hover);
 	}
 
 	.btn-ghost {
 		background: transparent;
-		color: #374151;
-		border: 1px solid #e2e8f0;
+		color: var(--clr-text-2);
+		border: 1px solid var(--clr-border-mid);
 	}
 
 	.btn-ghost:hover:not(:disabled) {
-		background: #f1f5f9;
+		background: var(--clr-surface-alt);
 	}
 
 	.alert {
@@ -372,9 +372,9 @@
 
 	.alert a { color: inherit; font-weight: 600; }
 
-	.alert-warn    { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-	.alert-error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-	.alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+	.alert-warn    { background: var(--clr-warning-bg); color: var(--clr-warning-dark); border: 1px solid var(--clr-warning-border); }
+	.alert-error   { background: var(--clr-danger-bg); color: var(--clr-danger); border: 1px solid var(--clr-danger-border); }
+	.alert-success { background: var(--clr-success-bg); color: var(--clr-success-dark); border: 1px solid var(--clr-success-border); }
 
 	.results-header {
 		display: flex;
@@ -385,7 +385,7 @@
 
 	.results-count {
 		font-size: 0.88rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 	}
 
 	.results-actions {
@@ -394,10 +394,10 @@
 	}
 
 	.table-wrap {
-		background: #fff;
+		background: var(--clr-surface);
 		border-radius: 10px;
 		overflow: hidden;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+		box-shadow: 0 1px 3px var(--clr-shadow);
 	}
 
 	.table {
@@ -411,34 +411,34 @@
 		padding: 10px 14px;
 		font-size: 0.72rem;
 		font-weight: 600;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		border-bottom: 1px solid #e2e8f0;
-		background: #f8fafc;
+		border-bottom: 1px solid var(--clr-border-mid);
+		background: var(--clr-surface-raised);
 	}
 
 	.th-check { width: 36px; }
 
 	.table td {
 		padding: 10px 14px;
-		border-bottom: 1px solid #f1f5f9;
-		color: #374151;
+		border-bottom: 1px solid var(--clr-border-subtle);
+		color: var(--clr-text-2);
 		cursor: pointer;
 	}
 
 	.table tr:last-child td { border-bottom: none; }
 
-	.table tr:hover td { background: #f8fafc; }
+	.table tr:hover td { background: var(--clr-surface-raised); }
 
-	.table tr.selected td { background: #eff6ff; }
+	.table tr.selected td { background: var(--clr-primary-bg); }
 
 	.td-check { text-align: center; }
 
 	.ksef-ref {
 		font-family: monospace;
 		font-size: 0.78rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		max-width: 160px;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -454,7 +454,7 @@
 
 	.sub-nip {
 		font-size: 0.75rem;
-		color: #94a3b8;
+		color: var(--clr-text-faint);
 		margin-top: 1px;
 	}
 </style>

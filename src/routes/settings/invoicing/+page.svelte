@@ -50,7 +50,8 @@
 	</button>
 </div>
 
-<h2 class="section-title">Numeracja faktur</h2>
+<fieldset class="fieldset">
+<legend>Numeracja faktur</legend>
 
 <div class="form-group" style="max-width:400px">
 	<label for="template">Szablon numeracji</label>
@@ -67,8 +68,10 @@
 	<span class="mdi mdi-eye"></span>
 	Podgląd: <strong>{templatePreview()}</strong>
 </div>
+</fieldset>
 
-<h2 class="section-title" style="margin-top:32px">Domyślne ustawienia faktury</h2>
+<fieldset class="fieldset">
+<legend>Domyślne ustawienia faktury</legend>
 
 <div class="form-group" style="max-width:200px">
 	<label for="paymentDays">Domyślny termin płatności (dni)</label>
@@ -83,6 +86,7 @@
 	</label>
 	<p class="hint">Gdy włączone, pole ilości używa kroku 1 zamiast 0.001.</p>
 </div>
+</fieldset>
 
 <style>
 	.checkbox-label {
@@ -90,7 +94,7 @@
 		align-items: center;
 		gap: 8px;
 		font-size: 0.9rem;
-		color: #374151;
+		color: var(--clr-text-2);
 		cursor: pointer;
 	}
 </style>

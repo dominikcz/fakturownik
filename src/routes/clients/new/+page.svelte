@@ -46,8 +46,8 @@
 	.page-header { margin-bottom: 24px; }
 	.breadcrumb {
 		display: flex; align-items: center; gap: 4px;
-		font-size: 0.85rem; color: #64748b; margin-bottom: 8px;
+		font-size: 0.85rem; color: var(--clr-text-muted); margin-bottom: 8px;
 	}
-	.breadcrumb a { color: #2563eb; }
-	.page-title { font-size: 1.5rem; font-weight: 700; color: #111827; }
+	.breadcrumb a { color: var(--clr-link); }
+	.page-title { font-size: 1.5rem; font-weight: 700; color: var(--clr-text); }
 </style>

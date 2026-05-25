@@ -109,7 +109,8 @@
 	</button>
 </div>
 
-<h2 class="section-title">Integracja z KSeF</h2>
+<fieldset class="fieldset">
+<legend>Integracja z KSeF</legend>
 
 <div class="info-box" style="margin-bottom:20px">
 	<span class="mdi mdi-information"></span>
@@ -124,8 +125,10 @@
 		{/each}
 	</select>
 </div>
+</fieldset>
 
-<h2 class="section-title" style="margin-top:28px">Certyfikat KSeF</h2>
+<fieldset class="fieldset">
+<legend>Certyfikat KSeF</legend>
 
 <div class="env-tabs">
 	{#each ['TEST', 'DEMO', 'PRD'] as env}
@@ -146,7 +149,7 @@
 		{/if}
 		<button class="btn-link" onclick={removeCerts}>Usuń</button>
 	{:else}
-		Brak certyfikatu ({certTab}) – wgraj pliki poniżej.
+		Brak certyfikatu ({certTab}) - wgraj pliki poniżej.
 	{/if}
 </div>
 
@@ -164,7 +167,7 @@
 			i wygeneruj certyfikat (sekcja „Certyfikaty").
 		{/if}
 		Otrzymasz dwa pliki: <code>cert.crt</code> i <code>cert.key</code>.
-		Zaszyfrowany klucz możesz wgrać z hasłem – aplikacja odszyfruje go automatycznie.
+		Zaszyfrowany klucz możesz wgrać z hasłem - aplikacja odszyfruje go automatycznie.
 	</div>
 </div>
 
@@ -202,6 +205,7 @@
 		</button>
 	</div>
 </div>
+</fieldset>
 
 <style>
 	.cert-status {
@@ -214,12 +218,12 @@
 		margin-bottom: 16px;
 	}
 	.cert-ok {
-		background: #d1fae5;
-		color: #065f46;
+		background: var(--clr-cert-ok-bg);
+		color: var(--clr-cert-ok-text);
 	}
 	.cert-missing {
-		background: #fef3c7;
-		color: #92400e;
+		background: var(--clr-cert-miss-bg);
+		color: var(--clr-cert-miss-text);
 	}
 	.cert-filename {
 		font-size: 0.85em;
@@ -253,7 +257,7 @@
 	}
 	.file-name {
 		font-size: 0.8em;
-		color: #555;
+		color: var(--clr-text-muted);
 		margin-top: 2px;
 		display: block;
 	}
@@ -272,19 +276,19 @@
 		background: none;
 		border: none;
 		cursor: pointer;
-		color: #666;
+		color: var(--clr-text-muted);
 		padding: 4px;
 		line-height: 1;
 		font-size: 1.1rem;
 	}
 	.toggle-pw:hover {
-		color: #333;
+		color: var(--clr-text);
 	}
 	.env-tabs {
 		display: flex;
 		gap: 0;
 		margin-bottom: 1rem;
-		border-bottom: 2px solid #dee2e6;
+		border-bottom: 2px solid var(--clr-border);
 	}
 	.env-tab {
 		padding: 0.5rem 1.25rem;
@@ -292,15 +296,15 @@
 		background: none;
 		cursor: pointer;
 		font-size: 0.9rem;
-		color: #6c757d;
+		color: var(--clr-text-muted);
 		border-bottom: 2px solid transparent;
 		margin-bottom: -2px;
 		transition: color 0.15s;
 	}
-	.env-tab:hover { color: #333; }
+	.env-tab:hover { color: var(--clr-text); }
 	.env-tab.active {
-		color: #0d6efd;
-		border-bottom-color: #0d6efd;
+		color: var(--clr-primary);
+		border-bottom-color: var(--clr-primary);
 		font-weight: 500;
 	}
 	.env-tab-active-dot {
@@ -308,19 +312,19 @@
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: #22c55e;
+		background: var(--clr-success);
 		margin-left: 5px;
 		vertical-align: middle;
 		margin-bottom: 1px;
 	}
 	:global(.info-box a.info-link) {
-		color: #0d47a1;
+		color: var(--clr-primary);
 		font-weight: 600;
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
 	:global(.info-box a.info-link:hover) {
-		color: #1565c0;
+		color: var(--clr-primary-hover);
 		text-decoration-thickness: 2px;
 	}
 </style>

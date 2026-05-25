@@ -86,7 +86,7 @@
 		<div class="ksef-lock-notice">
 			<span class="mdi mdi-lock-outline"></span>
 			<div>
-				<strong>Faktura została wysłana do KSeF</strong> – nie można edytować jej treści.
+				<strong>Faktura została wysłana do KSeF</strong> - nie można edytować jej treści.
 				Możesz zmienić tylko kategorię.
 			</div>
 		</div>
@@ -144,28 +144,28 @@
 		align-items: center;
 		gap: 4px;
 		font-size: 0.85rem;
-		color: #64748b;
+		color: var(--clr-text-muted);
 		margin-bottom: 8px;
 	}
 	.breadcrumb a {
-		color: #2563eb;
+		color: var(--clr-link);
 	}
 	.page-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: #111827;
+		color: var(--clr-text);
 	}
 
 	.ksef-lock-notice {
 		display: flex;
 		align-items: flex-start;
 		gap: 12px;
-		background: #fef9c3;
-		border: 1px solid #fde047;
+		background: var(--clr-warning-bg);
+		border: 1px solid var(--clr-warning-border);
 		border-radius: 8px;
 		padding: 14px 18px;
 		margin-bottom: 24px;
-		color: #713f12;
+		color: var(--clr-warning-dark);
 		font-size: 0.9rem;
 	}
 	.ksef-lock-notice .mdi {
@@ -175,8 +175,8 @@
 	}
 
 	.restricted-form {
-		background: #fff;
-		border: 1px solid #e5e7eb;
+		background: var(--clr-surface);
+		border: 1px solid var(--clr-border);
 		border-radius: 10px;
 		padding: 24px;
 		max-width: 420px;
@@ -191,18 +191,18 @@
 	.form-group label {
 		font-size: 0.8rem;
 		font-weight: 500;
-		color: #64748b;
+		color: var(--clr-text-muted);
 	}
 	.inp {
 		padding: 8px 10px;
-		border: 1px solid #d1d5db;
+		border: 1px solid var(--clr-border-input);
 		border-radius: 6px;
 		font-size: 0.9rem;
 		font-family: inherit;
-		color: #111827;
-		background: #fff;
+		color: var(--clr-text);
+		background: var(--clr-surface);
 	}
-	.inp:focus { outline: 2px solid #2563eb; border-color: transparent; }
+	.inp:focus { outline: 2px solid var(--clr-primary); border-color: transparent; }
 
 	.form-actions {
 		display: flex;
@@ -210,16 +210,16 @@
 	}
 
 	.alert-error {
-		background: #fee2e2;
-		color: #dc2626;
+		background: var(--clr-danger-hover-bg);
+		color: var(--clr-danger);
 		padding: 8px 12px;
 		border-radius: 6px;
 		font-size: 0.875rem;
 		margin-bottom: 16px;
 	}
 
-	.muted { font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; }
-	.muted a { color: #2563eb; }
+	.muted { font-size: 0.9rem; color: var(--clr-text-muted); margin-bottom: 20px; }
+	.muted a { color: var(--clr-link); }
 
 	.btn {
 		display: inline-flex;
@@ -236,9 +236,9 @@
 		transition: background 0.15s;
 	}
 	.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-	.btn-primary { background: #2563eb; color: #fff; }
-	.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
-	.btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
-	.btn-secondary:hover { background: #e2e8f0; }
+	.btn-primary { background: var(--clr-primary); color: #fff; }
+	.btn-primary:hover:not(:disabled) { background: var(--clr-primary-hover); }
+	.btn-secondary { background: var(--clr-surface-alt); color: var(--clr-text-heading); border: 1px solid var(--clr-border-mid); }
+	.btn-secondary:hover { background: var(--clr-surface-hover); }
 </style>
 
