@@ -117,7 +117,7 @@
 						<th>Nabywca</th>
 						<th>Kwota brutto</th>
 						<th>Status</th>
-						<th></th>
+						<th>Akcje</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -141,9 +141,12 @@
 									</span>
 								{/if}
 							</td>
-							<td>
-							<a href="/invoices/{invoice.id}" class="btn btn-sm btn-ghost" title="Podgląd">
+							<td class="actions">
+								<a href="/invoices/{invoice.id}" class="btn btn-sm btn-ghost" title="Podgląd">
 									<span class="mdi mdi-eye"></span>
+								</a>
+								<a href="/invoices/new?copyFrom={invoice.id}" class="btn btn-sm btn-ghost" title="Kopiuj fakturę">
+									<span class="mdi mdi-content-copy"></span>
 								</a>
 							</td>
 						</tr>
@@ -332,6 +335,10 @@
 
 	.view-all a {
 		color: #2563eb;
+	}
+
+	.actions {
+		white-space: nowrap;
 	}
 
 	.category-grid {
