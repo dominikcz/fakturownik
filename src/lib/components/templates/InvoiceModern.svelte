@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Invoice, Settings } from '$lib/types.js';
 	import type { InvoiceTemplateConfig } from '$lib/invoiceTemplates.js';
-	import { vatRateLabels, paymentMethodLabels, fmt } from '$lib/invoiceUtils.js';
+	import { vatRateLabels, paymentMethodLabels, fmt, fmtDate } from '$lib/invoiceUtils.js';
 
 	interface Props {
 		invoice: Invoice & { id?: string };
@@ -29,7 +29,7 @@
 		<div class="header-left">
 			<div class="meta-item">
 				<div class="meta-label">Data wystawienia</div>
-				<div class="meta-val">{invoice.issueDate}</div>
+				<div class="meta-val">{fmtDate(invoice.issueDate)}</div>
 			</div>
 			<div class="meta-item">
 				<div class="meta-label">Numer faktury</div>
@@ -137,7 +137,7 @@
 		<div class="footer-left">
 			<div class="footer-meta-item">
 				<div class="footer-label">Data sprzedaży</div>
-				<div class="footer-value">&#9658; {invoice.saleDate}</div>
+				<div class="footer-value">&#9658; {fmtDate(invoice.saleDate)}</div>
 			</div>
 			{#if invoice.bankAccount && invoice.paymentMethod === 'transfer'}
 				<div class="footer-meta-item">
@@ -154,7 +154,7 @@
 			<div class="pay-label">PROSIMY O WPŁATĘ</div>
 			<div class="pay-amount">{fmt(invoice.summary.grossTotal)} zł</div>
 			<div class="pay-due-label">TERMIN PŁATNOŚCI:</div>
-			<div class="pay-due-date">{invoice.paymentDueDate}</div>
+			<div class="pay-due-date">{fmtDate(invoice.paymentDueDate)}</div>
 		</div>
 	</div>
 

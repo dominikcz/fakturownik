@@ -227,6 +227,13 @@ export interface KsefInvoiceMeta {
 	sellerNip: string;
 }
 
+export async function fetchKsefInvoiceXml(settings: Settings, ksefNumber: string): Promise<string> {
+	const { ksef } = settings;
+	const nipContext = ksef.nip?.replace(/\D/g, '') || settings.seller.nip?.replace(/\D/g, '') || '';
+	const client = await createAuthenticatedClient({ ...ksef, nip: nipContext });
+	return client.invoices.getInvoice(ksefNumber);
+}
+
 export async function queryKsefInvoices(
 	settings: Settings,
 	dateFrom: string,
@@ -239,9 +246,9 @@ export async function queryKsefInvoices(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const response = await client.invoices.queryInvoiceMetadata(
 		{
-			subjectType: 'subject1',
+			subjectType: 'Subject1',
 			dateRange: {
-				dateType: 'InvoicingDate',
+				dateType: 'Invoicing',
 				from: dateFrom,
 				to: dateTo
 			}
@@ -254,16 +261,16 @@ export async function queryKsefInvoices(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const items: any[] = response?.invoices ?? response?.invoiceHeaderList ?? [];
 	return items.map((item: any) => ({
-		ksefReferenceNumber: item.ksefReferenceNumber ?? item.invoiceReferenceNumber ?? '',
+		ksefReferenceNumber: item.ksefNumber ?? item.ksefReferenceNumber ?? item.invoiceReferenceNumber ?? '',
 		invoiceNumber: item.invoiceNumber ?? item.number ?? '',
 		invoicingDate: item.invoicingDate ?? item.issueDate ?? '',
-		net: parseFloat(item.net ?? item.p15 ?? 0),
-		vat: parseFloat(item.vat ?? 0),
-		gross: parseFloat(item.gross ?? item.p16 ?? 0),
-		buyerName: item.subjectTo?.name ?? item.buyerName ?? '',
-		buyerNip: item.subjectTo?.issuedToIdentifier?.identifier ?? item.buyerNip ?? '',
-		sellerName: item.subjectBy?.name ?? item.sellerName ?? '',
-		sellerNip: item.subjectBy?.issuedToIdentifier?.identifier ?? item.sellerNip ?? '',
+		net: parseFloat(item.netAmount ?? item.net ?? item.p15 ?? 0),
+		vat: parseFloat(item.vatAmount ?? item.vat ?? 0),
+		gross: parseFloat(item.grossAmount ?? item.gross ?? item.p16 ?? 0),
+		buyerName: item.buyer?.name ?? item.subjectTo?.name ?? item.buyerName ?? '',
+		buyerNip: item.buyer?.identifier?.value ?? item.subjectTo?.issuedToIdentifier?.identifier ?? item.buyerNip ?? '',
+		sellerName: item.seller?.name ?? item.subjectBy?.name ?? item.sellerName ?? '',
+		sellerNip: item.seller?.nip ?? item.subjectBy?.issuedToIdentifier?.identifier ?? item.sellerNip ?? '',
 	}));
 }
 

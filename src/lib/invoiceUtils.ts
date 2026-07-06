@@ -13,6 +13,12 @@ export const paymentMethodLabels: Record<string, string> = {
 	card: 'Karta płatnicza'
 };
 
+/** Zwraca tylko część YYYY-MM-DD z dowolnego ISO date/datetime, odpornie na dane z KSeF. */
+export function fmtDate(d: string | undefined | null): string {
+	if (!d) return '—';
+	return d.slice(0, 10);
+}
+
 export function fmt(n: number): string {
 	return new Intl.NumberFormat('pl-PL', {
 		minimumFractionDigits: 2,

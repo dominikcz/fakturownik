@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types.js';
+	import { fmtDate } from '$lib/invoiceUtils.js';
 
 	let { data }: { data: PageData } = $props();
 
@@ -124,7 +125,7 @@
 					{#each data.recentInvoices as invoice}
 						<tr>
 							<td><a href="/invoices/{invoice.id}">{invoice.number}</a></td>
-							<td>{invoice.issueDate}</td>
+							<td>{fmtDate(invoice.issueDate)}</td>
 							<td>{invoice.buyer?.name ?? '—'}</td>
 							<td class="amount">{formatAmount(invoice.summary.grossTotal)} zł</td>
 							<td>

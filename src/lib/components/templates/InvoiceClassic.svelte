@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Invoice, Settings } from '$lib/types.js';
 	import type { InvoiceTemplateConfig } from '$lib/invoiceTemplates.js';
-	import { vatRateLabels, paymentMethodLabels, fmt } from '$lib/invoiceUtils.js';
+	import { vatRateLabels, paymentMethodLabels, fmt, fmtDate } from '$lib/invoiceUtils.js';
 
 	interface Props {
 		invoice: Invoice & { id?: string };
@@ -35,20 +35,20 @@
 		</div>
 		<div class="header-meta">
 			{#if invoice.placeOfIssue}
-				<div class="place-date">{invoice.placeOfIssue.charAt(0).toUpperCase() + invoice.placeOfIssue.slice(1).toLowerCase()}, {invoice.issueDate}</div>
-			{:else}
+				<div class="place-date">{invoice.placeOfIssue.charAt(0).toUpperCase() + invoice.placeOfIssue.slice(1).toLowerCase()}, {fmtDate(invoice.issueDate)}</div>
+				{:else}
 				<div class="meta-row">
 					<span class="meta-label">Data wystawienia:</span>
-					<span class="meta-value">{invoice.issueDate}</span>
+					<span class="meta-value">{fmtDate(invoice.issueDate)}</span>
 				</div>
-			{/if}
-			<div class="meta-row">
-				<span class="meta-label">Data sprzedaży:</span>
-				<span class="meta-value">{invoice.saleDate}</span>
-			</div>
-			<div class="meta-row">
-				<span class="meta-label">Termin płatności:</span>
-				<span class="meta-value">{invoice.paymentDueDate}</span>
+				{/if}
+				<div class="meta-row">
+					<span class="meta-label">Data sprzedaży:</span>
+					<span class="meta-value">{fmtDate(invoice.saleDate)}</span>
+				</div>
+				<div class="meta-row">
+					<span class="meta-label">Termin płatności:</span>
+					<span class="meta-value">{fmtDate(invoice.paymentDueDate)}</span>
 			</div>
 			<div class="meta-row">
 				<span class="meta-label">Forma płatności:</span>

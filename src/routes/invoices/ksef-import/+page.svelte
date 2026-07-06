@@ -28,6 +28,7 @@
 	let results = $state<KsefMeta[]>([]);
 	let selected = $state<Set<string>>(new Set());
 	let importDone = $state<{ imported: number; skipped: number } | null>(null);
+	let forceImport = $state(false);
 
 	function toggleAll() {
 		if (selected.size === results.length) {
@@ -76,7 +77,7 @@
 		importDone = null;
 		try {
 			const items = results.filter((r) => selected.has(r.ksefReferenceNumber));
-			const res = await fetch('/api/invoices/ksef-import', {
+			const res = await fetch(`/api/invoices/ksef-import${forceImport ? '?force=true' : ''}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ items })
@@ -98,6 +99,20 @@
 
 	function formatAmount(n: number): string {
 		return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2 }).format(n);
+	}
+
+	function formatDate(d: string): string {
+		if (!d) return '—';
+		const date = new Date(d);
+		if (isNaN(date.getTime())) return d;
+		return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
+	}
+
+	function formatKsefRef(ref: string): string {
+		if (!ref) return '—';
+		const parts = ref.split('-');
+		if (parts.length < 2) return ref;
+		return '\u2026' + parts.slice(-2).join('-');
 	}
 </script>
 
@@ -156,7 +171,7 @@
 				{#if importDone.skipped > 0}
 					Pominięto {importDone.skipped} (już istniały w systemie).
 				{/if}
-				<a href="/invoices">Przejdź do listy faktur</a>.
+				<a href="/invoices"><span class="mdi mdi-arrow-right"></span> Przejdź do listy faktur</a>
 			</div>
 		{/if}
 
@@ -164,6 +179,10 @@
 			<div class="results-header">
 				<span class="results-count">Znaleziono {results.length} faktur</span>
 				<div class="results-actions">
+					<label class="force-toggle" title="Importuje również faktury, które już istnieją lokalnie (bez nadpisywania)">
+						<input type="checkbox" bind:checked={forceImport} />
+						Importuj mimo duplikatów
+					</label>
 					<button class="btn btn-ghost" onclick={toggleAll}>
 						{selected.size === results.length ? 'Odznacz wszystkie' : 'Zaznacz wszystkie'}
 					</button>
@@ -210,9 +229,9 @@
 										onclick={(e) => e.stopPropagation()}
 									/>
 								</td>
-								<td class="ksef-ref">{item.ksefReferenceNumber}</td>
+								<td class="ksef-ref" title={item.ksefReferenceNumber}>{formatKsefRef(item.ksefReferenceNumber)}</td>
 								<td>{item.invoiceNumber}</td>
-								<td>{item.invoicingDate}</td>
+								<td>{formatDate(item.invoicingDate)}</td>
 								<td>
 									<div>{item.buyerName || '—'}</div>
 									{#if item.buyerNip}
@@ -370,7 +389,7 @@
 
 	.alert .mdi { flex-shrink: 0; font-size: 1.1rem; margin-top: 1px; }
 
-	.alert a { color: inherit; font-weight: 600; }
+	.alert a { color: inherit; font-weight: 600; text-decoration: underline; }
 
 	.alert-warn    { background: var(--clr-warning-bg); color: var(--clr-warning-dark); border: 1px solid var(--clr-warning-border); }
 	.alert-error   { background: var(--clr-danger-bg); color: var(--clr-danger); border: 1px solid var(--clr-danger-border); }
@@ -390,7 +409,18 @@
 
 	.results-actions {
 		display: flex;
+		align-items: center;
 		gap: 8px;
+	}
+
+	.force-toggle {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.82rem;
+		color: var(--clr-text-muted);
+		cursor: pointer;
+		user-select: none;
 	}
 
 	.table-wrap {
@@ -439,9 +469,6 @@
 		font-family: monospace;
 		font-size: 0.78rem;
 		color: var(--clr-text-muted);
-		max-width: 160px;
-		overflow: hidden;
-		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 

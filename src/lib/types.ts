@@ -123,6 +123,7 @@ export interface Invoice {
 	ksefInvoiceHash?: string;
 	upoXml?: string;
 	ksefErrorMessage?: string;
+	ksefImported?: boolean;
 	categoryId?: string;
 	createdAt: string;
 	updatedAt: string;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types.js';
 	import { invalidateAll } from '$app/navigation';
+	import { fmtDate } from '$lib/invoiceUtils.js';
 
 	let { data }: { data: PageData } = $props();
 
@@ -17,7 +18,7 @@
 		issued: '#2563eb',
 		sent_to_ksef: '#d97706',
 		ksef_pending_upo: '#7c3aed',
-		ksef_accepted: '#059669',
+		ksef_accepted: '#34d399',
 		ksef_error: '#dc2626'
 	};
 
@@ -105,7 +106,7 @@
 					{#each filteredInvoices as invoice}
 						<tr>
 							<td><a href="/invoices/{invoice.id}">{invoice.number}</a></td>
-							<td>{invoice.issueDate}</td>
+							<td>{fmtDate(invoice.issueDate)}</td>
 							<td>{invoice.buyer?.name ?? '—'}</td>
 							<td class="amount">{formatAmount(invoice.summary.netTotal)} zł</td>
 							<td class="amount">{formatAmount(invoice.summary.grossTotal)} zł</td>
@@ -121,8 +122,9 @@
 									<span class="badge" style="background:{cat.color}18; color:{cat.color}; margin-left:4px">
 										{cat.symbol} {cat.name}
 									</span>
-								{/if}
-							</td>
+								{/if}							{#if invoice.ksefImported}
+								<span class="badge badge-ksef" title="Zaimportowana z KSeF">KSeF ↓</span>
+							{/if}							</td>
 							<td class="actions">
 								<a href="/invoices/{invoice.id}" class="icon-btn" title="Podgląd">
 									<span class="mdi mdi-eye"></span>
@@ -298,6 +300,12 @@
 		font-weight: 500;
 	}
 
+	.badge-ksef {
+		background: #38bdf830;
+		color: #38bdf8;
+		margin-left: 4px;
+	}
+
 	.actions {
 		display: flex;
 		gap: 4px;
@@ -310,6 +318,8 @@
 		width: 30px;
 		height: 30px;
 		border-radius: 5px;
+		border: none;
+		cursor: pointer;
 		color: var(--clr-text-muted);
 		background: transparent;
 		transition: background 0.15s, color 0.15s;

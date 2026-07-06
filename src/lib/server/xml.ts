@@ -151,3 +151,162 @@ export function buildFa3Xml(invoice: Invoice): string {
 </Faktura>`;
 }
 
+// ---------------------------------------------------------------------------
+// Parser FA(3) XML z KSeF → dane faktury
+// ---------------------------------------------------------------------------
+
+function unescapeXml(s: string): string {
+	return s
+		.replace(/&amp;/g, '&')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&apos;/g, "'");
+}
+
+/** Zwraca tekst pierwszego wystąpienia tagu (ignoruje namespace prefix). */
+function tagText(xml: string, tag: string): string {
+	const re = new RegExp(`<(?:[^:>]+:)?${tag}(?:\\s[^>]*)?>([^<]*)</(?:[^:>]+:)?${tag}>`);
+	const m = xml.match(re);
+	return m ? unescapeXml(m[1].trim()) : '';
+}
+
+/** Zwraca zawartość pierwszego bloku tagu. */
+function tagBlock(xml: string, tag: string): string {
+	const re = new RegExp(`<(?:[^:>]+:)?${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[^:>]+:)?${tag}>`);
+	const m = xml.match(re);
+	return m ? m[1] : '';
+}
+
+/** Zwraca zawartości wszystkich bloków tagu. */
+function tagBlocks(xml: string, tag: string): string[] {
+	const re = new RegExp(`<(?:[^:>]+:)?${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[^:>]+:)?${tag}>`, 'g');
+	const results: string[] = [];
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(xml)) !== null) results.push(m[1]);
+	return results;
+}
+
+const P12_TO_VAT_RATE: Record<string, string> = {
+	'23': '23', '8': '8', '5': '5',
+	'0 KR': '0', '0': '0',
+	'zw': 'zw', 'np I': 'np', 'np': 'np',
+};
+
+const FORMA_PLATNOSCI: Record<string, string> = {
+	'1': 'cash', '3': 'card', '6': 'transfer',
+};
+
+export interface ParsedKsefInvoice {
+	number: string;
+	issueDate: string;
+	saleDate: string;
+	placeOfIssue: string;
+	paymentDueDate: string;
+	paymentMethod: string;
+	bankAccount: string;
+	seller: { nip: string; name: string; address: string; city: string; postalCode: string };
+	buyer: { nip: string; name: string; address: string; city: string; postalCode: string; country: string };
+	items: Array<{
+		description: string; unit: string; quantity: number;
+		unitPriceNet: number; vatRate: string;
+		netTotal: number; vatTotal: number; grossTotal: number;
+	}>;
+	summary: { netTotal: number; vatTotal: number; grossTotal: number; byVatRate: Array<{ rate: string; net: number; vat: number; gross: number }> };
+}
+
+/** Parsuje AdresL2 w formacie "KK-KKK Miasto" → { postalCode, city }. */
+function parseAdresL2(s: string): { postalCode: string; city: string } {
+	const m = s.match(/^(\d{2}-\d{3})\s+(.+)$/);
+	return m ? { postalCode: m[1], city: m[2] } : { postalCode: '', city: s.trim() };
+}
+
+/** Formatuje 26-cyfrowy numer konta jako "34 1234 1234 1234 1234 1234 1234". */
+function formatIban(raw: string): string {
+	const digits = raw.replace(/\s/g, '');
+	const m = digits.match(/^(.{2})(.{4})(.{4})(.{4})(.{4})(.{4})(.{4})$/);
+	return m ? `${m[1]} ${m[2]} ${m[3]} ${m[4]} ${m[5]} ${m[6]} ${m[7]}` : raw;
+}
+
+export function parseKsefFaXml(xml: string): ParsedKsefInvoice {
+	const faBlock    = tagBlock(xml, 'Fa');
+	const p1Block    = tagBlock(xml, 'Podmiot1');
+	const p2Block    = tagBlock(xml, 'Podmiot2');
+	const platnoscBlock = tagBlock(faBlock, 'Platnosc');
+
+	// Sprzedawca
+	const s1id  = tagBlock(p1Block, 'DaneIdentyfikacyjne');
+	const s1adr = tagBlock(p1Block, 'Adres');
+	const { postalCode: sellerPC, city: sellerCity } = parseAdresL2(tagText(s1adr, 'AdresL2'));
+
+	// Nabywca
+	const s2id  = tagBlock(p2Block, 'DaneIdentyfikacyjne');
+	const s2adr = tagBlock(p2Block, 'Adres');
+	const { postalCode: buyerPC, city: buyerCity } = parseAdresL2(tagText(s2adr, 'AdresL2'));
+
+	// Daty
+	const issueDate      = tagText(faBlock, 'P_1').slice(0, 10);
+	const saleDateRaw    = tagText(faBlock, 'P_6').slice(0, 10);
+	const saleDate       = saleDateRaw || issueDate;
+	const paymentDueDate = tagText(platnoscBlock, 'Termin').slice(0, 10);
+
+	// Pozycje
+	const items = tagBlocks(faBlock, 'FaWiersz').map((block) => {
+		const vatRateRaw = tagText(block, 'P_12');
+		const vatRate    = P12_TO_VAT_RATE[vatRateRaw] ?? vatRateRaw;
+		const netTotal   = parseFloat(tagText(block, 'P_11')) || 0;
+		const quantity   = parseFloat(tagText(block, 'P_8B')) || 1;
+		const unitPriceNet = parseFloat(tagText(block, 'P_9A')) || (netTotal / quantity);
+		const vatRateNum = parseFloat(vatRate);
+		const vatTotal   = isNaN(vatRateNum) ? 0 : Math.round(netTotal * vatRateNum) / 100;
+		return {
+			description: tagText(block, 'P_7'),
+			unit: tagText(block, 'P_8A') || 'szt.',
+			quantity, unitPriceNet, vatRate,
+			netTotal, vatTotal,
+			grossTotal: parseFloat((netTotal + vatTotal).toFixed(2)),
+		};
+	});
+
+	// Sumy
+	const netTotal  = parseFloat(items.reduce((s, i) => s + i.netTotal, 0).toFixed(2));
+	const vatTotal  = parseFloat(items.reduce((s, i) => s + i.vatTotal, 0).toFixed(2));
+	const grossTotal = parseFloat(tagText(faBlock, 'P_15')) || parseFloat((netTotal + vatTotal).toFixed(2));
+
+	// byVatRate
+	const byVatRateMap = new Map<string, { net: number; vat: number; gross: number }>();
+	for (const item of items) {
+		const r = byVatRateMap.get(item.vatRate) ?? { net: 0, vat: 0, gross: 0 };
+		r.net   = parseFloat((r.net   + item.netTotal).toFixed(2));
+		r.vat   = parseFloat((r.vat   + item.vatTotal).toFixed(2));
+		r.gross = parseFloat((r.gross + item.grossTotal).toFixed(2));
+		byVatRateMap.set(item.vatRate, r);
+	}
+	const byVatRate = [...byVatRateMap.entries()].map(([rate, v]) => ({ rate, ...v }));
+
+	return {
+		number: tagText(faBlock, 'P_2'),
+		issueDate, saleDate, paymentDueDate,
+		placeOfIssue: tagText(faBlock, 'MiejsceWystawienia'),
+		paymentMethod: FORMA_PLATNOSCI[tagText(platnoscBlock, 'FormaPlatnosci')] ?? 'transfer',
+		bankAccount: formatIban(tagText(platnoscBlock, 'NrRB')),
+		seller: {
+			nip:        tagText(s1id, 'NIP'),
+			name:       tagText(s1id, 'Nazwa') || tagText(s1id, 'PelnaNazwa'),
+			address:    tagText(s1adr, 'AdresL1'),
+			city:       sellerCity,
+			postalCode: sellerPC,
+		},
+		buyer: {
+			nip:        tagText(s2id, 'NIP'),
+			name:       tagText(s2id, 'Nazwa') || tagText(s2id, 'PelnaNazwa'),
+			address:    tagText(s2adr, 'AdresL1'),
+			city:       buyerCity,
+			postalCode: buyerPC,
+			country:    tagText(s2adr, 'KodKraju') || 'PL',
+		},
+		items,
+		summary: { netTotal, vatTotal, grossTotal, byVatRate },
+	};
+}
+
