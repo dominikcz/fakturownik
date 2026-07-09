@@ -209,7 +209,9 @@
 				name: settings.seller.name,
 				address: settings.seller.address,
 				city: settings.seller.city,
-				postalCode: settings.seller.postalCode
+				postalCode: settings.seller.postalCode,
+				...(settings.showSellerEmail && settings.seller.email ? { email: settings.seller.email } : {}),
+				...(settings.showSellerPhone && settings.seller.phone ? { phone: settings.seller.phone } : {})
 			},
 			buyer: {
 				nip: buyerNip,

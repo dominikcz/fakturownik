@@ -108,6 +108,7 @@ export function buildFa3Xml(invoice: Invoice): string {
 			<AdresL1>${esc(invoice.seller.address)}</AdresL1>
 			<AdresL2>${esc(invoice.seller.postalCode)} ${esc(invoice.seller.city)}</AdresL2>
 		</Adres>
+		${invoice.seller.email || invoice.seller.phone ? `<DaneKontaktowe>${invoice.seller.email ? `<Email>${esc(invoice.seller.email)}</Email>` : ''}${invoice.seller.phone ? `<Telefon>${esc(invoice.seller.phone)}</Telefon>` : ''}</DaneKontaktowe>` : ''}
 	</Podmiot1>
 	<Podmiot2>
 		<DaneIdentyfikacyjne>
@@ -205,7 +206,7 @@ export interface ParsedKsefInvoice {
 	paymentDueDate: string;
 	paymentMethod: string;
 	bankAccount: string;
-	seller: { nip: string; name: string; address: string; city: string; postalCode: string };
+	seller: { nip: string; name: string; address: string; city: string; postalCode: string; email?: string; phone?: string };
 	buyer: { nip: string; name: string; address: string; city: string; postalCode: string; country: string };
 	items: Array<{
 		description: string; unit: string; quantity: number;
@@ -235,9 +236,12 @@ export function parseKsefFaXml(xml: string): ParsedKsefInvoice {
 	const platnoscBlock = tagBlock(faBlock, 'Platnosc');
 
 	// Sprzedawca
-	const s1id  = tagBlock(p1Block, 'DaneIdentyfikacyjne');
-	const s1adr = tagBlock(p1Block, 'Adres');
+	const s1id      = tagBlock(p1Block, 'DaneIdentyfikacyjne');
+	const s1adr     = tagBlock(p1Block, 'Adres');
+	const s1contact = tagBlock(p1Block, 'DaneKontaktowe');
 	const { postalCode: sellerPC, city: sellerCity } = parseAdresL2(tagText(s1adr, 'AdresL2'));
+	const sellerEmail = s1contact ? tagText(s1contact, 'Email') : '';
+	const sellerPhone = s1contact ? tagText(s1contact, 'Telefon') : '';
 
 	// Nabywca
 	const s2id  = tagBlock(p2Block, 'DaneIdentyfikacyjne');
@@ -296,6 +300,8 @@ export function parseKsefFaXml(xml: string): ParsedKsefInvoice {
 			address:    tagText(s1adr, 'AdresL1'),
 			city:       sellerCity,
 			postalCode: sellerPC,
+			...(sellerEmail ? { email: sellerEmail } : {}),
+			...(sellerPhone ? { phone: sellerPhone } : {}),
 		},
 		buyer: {
 			nip:        tagText(s2id, 'NIP'),

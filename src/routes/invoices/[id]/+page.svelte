@@ -2,6 +2,7 @@
 	import InvoicePreview from '$lib/components/InvoicePreview.svelte';
 	import { showError, showSuccess } from '$lib/toast.js';
 	import { untrack } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
@@ -74,8 +75,7 @@
 				}
 			} else {
 				showSuccess(`UPO pobrane! Numer KSeF: ${body.ksefNumber}`);
-				invoice.status = 'ksef_accepted';
-				invoice.ksefNumber = body.ksefNumber;
+				await invalidateAll();
 			}
 		} catch {
 			showError('Błąd połączenia z serwerem');
@@ -147,6 +147,7 @@
 						class="btn btn-primary"
 						onclick={sendToKsef}
 						disabled={ksefLoading}
+						title="Wyślij do KSeF ({data.settings.ksef.environment})"
 					>
 						{#if ksefLoading}
 							<span class="mdi mdi-loading spin"></span>

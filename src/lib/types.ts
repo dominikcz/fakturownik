@@ -101,6 +101,8 @@ export interface InvoiceParty {
 	postalCode: string;
 	country?: string;
 	nipEu?: string;
+	email?: string;
+	phone?: string;
 }
 
 export interface Invoice {
