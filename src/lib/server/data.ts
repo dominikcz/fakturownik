@@ -53,7 +53,9 @@ const DEFAULT_SETTINGS: Settings = {
 	},
 	nextInvoiceNumber: 1,
 	defaultPaymentDays: 14,
-	nipLookupOrder: ['gus', 'biala_lista', 'vies']
+	nipLookupOrder: ['gus', 'biala_lista', 'vies'],
+	showSellerEmail: false,
+	showSellerPhone: false
 };
 
 export function getSettings(): Settings {

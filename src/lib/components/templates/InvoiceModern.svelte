@@ -62,6 +62,15 @@
 			<div class="party-info">{invoice.seller.address}</div>
 			<div class="party-info">{invoice.seller.postalCode} {invoice.seller.city}</div>
 			<div class="party-info">NIP: {invoice.seller.nip}</div>
+			{#if invoice.bankAccount}
+				<div class="party-info">Nr konta: {invoice.bankAccount}</div>
+			{/if}
+			{#if settings.showSellerEmail && settings.seller.email}
+				<div class="party-info">E-mail: {settings.seller.email}</div>
+			{/if}
+			{#if settings.showSellerPhone && settings.seller.phone}
+				<div class="party-info">Tel.: {settings.seller.phone}</div>
+			{/if}
 		</div>
 		<div class="party">
 			<h3 class="party-title">Nabywca</h3>

@@ -68,6 +68,12 @@
 			{#if invoice.bankAccount}
 				<div class="party-info">Nr konta: {invoice.bankAccount}</div>
 			{/if}
+			{#if settings.showSellerEmail && settings.seller.email}
+				<div class="party-info">E-mail: {settings.seller.email}</div>
+			{/if}
+			{#if settings.showSellerPhone && settings.seller.phone}
+				<div class="party-info">Tel.: {settings.seller.phone}</div>
+			{/if}
 		</div>
 		<div class="party">
 			<h3 class="party-title">Nabywca</h3>

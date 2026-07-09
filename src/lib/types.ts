@@ -39,6 +39,8 @@ export interface Settings {
 	defaultPaymentDays: number;
 	regonApiKey?: string;
 	nipLookupOrder: NipLookupSource[];
+	showSellerEmail?: boolean;
+	showSellerPhone?: boolean;
 }
 
 export type NipLookupSource = 'gus' | 'biala_lista' | 'vies';
