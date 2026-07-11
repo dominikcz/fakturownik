@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import '../app.css';
+	import { version } from '../../package.json';
 
 	let { children } = $props();
 
@@ -51,10 +52,13 @@
 
 <div class="app-shell">
 	<nav class="sidebar">
-		<div class="sidebar-logo">
+	<div class="sidebar-logo">
+		<div class="logo-main">
 			<span class="mdi mdi-receipt-text-outline"></span>
 			<span class="logo-text">Fakturownik</span>
 		</div>
+		<span class="logo-version">v{version}</span>
+	</div>
 		<ul class="nav-list">
 			{#each navLinks as link}
 				<li>
@@ -98,13 +102,20 @@
 
 	.sidebar-logo {
 		display: flex;
-		align-items: center;
-		gap: 10px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 5px;
 		padding: 20px 16px;
 		font-size: 1.1rem;
 		font-weight: 700;
 		border-bottom: 1px solid var(--clr-sidebar-border);
 		color: var(--clr-logo-text);
+	}
+	
+	.logo-version {
+		font-size: 0.7rem;
+		opacity: 0.7;
+		margin-left: 0;
 	}
 
 	.sidebar-logo .mdi {
