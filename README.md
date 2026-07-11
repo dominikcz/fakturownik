@@ -51,7 +51,7 @@ Aplikacja będzie dostępna pod adresem `http://localhost:5173`.
 
 ## Aktualizacja
 
-Jeśli masz aplikację pobraną za pomocą Git, to wystarczy, że w folderze aplikacji napiszesz:
+Jeśli masz aplikację pobraną za pomocą Git, to od wersji 0.9.11 aplikacja aktualizuje się jednym kliknięciem. Jeśli jednak chcesz to zrobić ręcznie, to wystarczy, że w folderze aplikacji napiszesz:
 
 ```
 git pull
