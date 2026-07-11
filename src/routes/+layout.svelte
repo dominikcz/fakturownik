@@ -201,7 +201,7 @@
 		align-items: center;
 		gap: 3px;
 		padding: 1px 6px;
-		font-size: 0.65rem;
+		font-size: 0.875rem;
 		background: var(--clr-primary);
 		color: #fff;
 		border: none;
@@ -220,6 +220,9 @@
 		cursor: default;
 	}
 
+	.update-btn .mdi::before {
+		color: #fff
+	}
 	.update-error {
 		font-size: 0.65rem;
 		color: #e74c3c;
