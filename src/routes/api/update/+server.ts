@@ -23,9 +23,17 @@ function isGitRepo(): boolean {
 	}
 }
 
-async function getLatestVersionFromGithub(): Promise<string | null> {
+function getCurrentBranch(): string {
 	try {
-		const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/package.json`;
+		return execSync('git branch --show-current', { stdio: 'pipe', timeout: 5000 }).toString().trim();
+	} catch {
+		return 'main';
+	}
+}
+
+async function getLatestVersionFromGithub(branch: string): Promise<string | null> {
+	try {
+		const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/package.json?ref=${encodeURIComponent(branch)}`;
 		const res = await fetch(url, {
 			headers: { 'Accept': 'application/vnd.github.v3.raw', 'User-Agent': 'fakturownik' }
 		});
@@ -39,11 +47,13 @@ async function getLatestVersionFromGithub(): Promise<string | null> {
 
 export const GET: RequestHandler = async () => {
 	const gitAvailable = isGitAvailable() && isGitRepo();
-	const latestVersion = await getLatestVersionFromGithub();
+	const branch = gitAvailable ? getCurrentBranch() : 'main';
+	const latestVersion = await getLatestVersionFromGithub(branch);
 
 	return json({
 		latestVersion,
 		gitAvailable,
+		branch,
 		githubPage: GITHUB_PAGE
 	});
 };
