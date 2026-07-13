@@ -78,6 +78,12 @@
 			<div class="party-info">{invoice.buyer.address}</div>
 			<div class="party-info">{invoice.buyer.postalCode} {invoice.buyer.city}</div>
 			<div class="party-info">NIP: {invoice.buyer.nip}</div>
+			{#if settings.showBuyerEmail && invoice.buyer.email}
+				<div class="party-info">E-mail: {invoice.buyer.email}</div>
+			{/if}
+			{#if settings.showBuyerPhone && invoice.buyer.phone}
+				<div class="party-info">Tel.: {invoice.buyer.phone}</div>
+			{/if}
 		</div>
 	</div>
 

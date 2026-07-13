@@ -120,6 +120,7 @@ export function buildFa3Xml(invoice: Invoice): string {
 			<AdresL1>${esc(invoice.buyer.address)}</AdresL1>
 			<AdresL2>${esc(invoice.buyer.postalCode)} ${esc(invoice.buyer.city)}</AdresL2>
 		</Adres>
+		${invoice.buyer.email || invoice.buyer.phone ? `<DaneKontaktowe>${invoice.buyer.email ? `<Email>${esc(invoice.buyer.email)}</Email>` : ''}${invoice.buyer.phone ? `<Telefon>${esc(invoice.buyer.phone)}</Telefon>` : ''}</DaneKontaktowe>` : ''}
 		<JST>2</JST>
 		<GV>2</GV>
 	</Podmiot2>
@@ -247,6 +248,9 @@ export function parseKsefFaXml(xml: string): ParsedKsefInvoice {
 	const s2id  = tagBlock(p2Block, 'DaneIdentyfikacyjne');
 	const s2adr = tagBlock(p2Block, 'Adres');
 	const { postalCode: buyerPC, city: buyerCity } = parseAdresL2(tagText(s2adr, 'AdresL2'));
+	const s2contact = tagBlock(p2Block, 'DaneKontaktowe');
+	const buyerEmail = s2contact ? tagText(s2contact, 'Email') : '';
+	const buyerPhone = s2contact ? tagText(s2contact, 'Telefon') : '';
 
 	// Daty
 	const issueDate      = tagText(faBlock, 'P_1').slice(0, 10);
@@ -310,6 +314,8 @@ export function parseKsefFaXml(xml: string): ParsedKsefInvoice {
 			city:       buyerCity,
 			postalCode: buyerPC,
 			country:    tagText(s2adr, 'KodKraju') || 'PL',
+			...(buyerEmail ? { email: buyerEmail } : {}),
+			...(buyerPhone ? { phone: buyerPhone } : {}),
 		},
 		items,
 		summary: { netTotal, vatTotal, grossTotal, byVatRate },

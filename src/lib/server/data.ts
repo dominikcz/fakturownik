@@ -55,7 +55,9 @@ const DEFAULT_SETTINGS: Settings = {
 	defaultPaymentDays: 14,
 	nipLookupOrder: ['gus', 'biala_lista', 'vies'],
 	showSellerEmail: false,
-	showSellerPhone: false
+	showSellerPhone: false,
+	showBuyerEmail: false,
+	showBuyerPhone: false
 };
 
 export function getSettings(): Settings {
@@ -83,6 +85,18 @@ export function getSettings(): Settings {
 	}
 	if (data.showItemColumns == null) {
 		data.showItemColumns = true;
+	}
+	if (data.showSellerEmail == null) {
+		data.showSellerEmail = false;
+	}
+	if (data.showSellerPhone == null) {
+		data.showSellerPhone = false;
+	}
+	if (data.showBuyerEmail == null) {
+		data.showBuyerEmail = false;
+	}
+	if (data.showBuyerPhone == null) {
+		data.showBuyerPhone = false;
 	}
 	return data;
 }

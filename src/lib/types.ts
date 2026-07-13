@@ -41,6 +41,8 @@ export interface Settings {
 	nipLookupOrder: NipLookupSource[];
 	showSellerEmail?: boolean;
 	showSellerPhone?: boolean;
+	showBuyerEmail?: boolean;
+	showBuyerPhone?: boolean;
 }
 
 export type NipLookupSource = 'gus' | 'biala_lista' | 'vies';

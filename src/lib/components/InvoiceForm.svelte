@@ -76,6 +76,8 @@
 	let buyerCity = $state(untrack(() => invoice.buyer?.city ?? ''));
 	let buyerPostalCode = $state(untrack(() => invoice.buyer?.postalCode ?? ''));
 	let buyerCountry = $state(untrack(() => invoice.buyer?.country ?? 'PL'));
+	let buyerEmail = $state(untrack(() => invoice.buyer?.email ?? ''));
+	let buyerPhone = $state(untrack(() => invoice.buyer?.phone ?? ''));
 
 	// Pozycje faktury
 	let items = $state<InvoiceItem[]>(untrack(() =>
@@ -159,6 +161,8 @@
 		buyerCity = client.city;
 		buyerPostalCode = client.postalCode;
 		buyerCountry = client.country;
+		buyerEmail = client.email ?? '';
+		buyerPhone = client.phone ?? '';
 	}
 
 	let clientSearch = $state('');
@@ -219,7 +223,9 @@
 				address: buyerAddress,
 				city: buyerCity,
 				postalCode: buyerPostalCode,
-				country: buyerCountry
+				country: buyerCountry,
+				...(buyerEmail ? { email: buyerEmail } : {}),
+				...(buyerPhone ? { phone: buyerPhone } : {})
 			},
 			items,
 			summary: summary()
@@ -383,6 +389,16 @@
 			<div class="form-group">
 				<label for="buyerCountry">Kraj</label>
 				<input id="buyerCountry" type="text" bind:value={buyerCountry} class="inp" maxlength={2} />
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group flex-1">
+				<label for="buyerEmail">E-mail</label>
+				<input id="buyerEmail" type="email" bind:value={buyerEmail} class="inp" />
+			</div>
+			<div class="form-group flex-1">
+				<label for="buyerPhone">Telefon</label>
+				<input id="buyerPhone" type="tel" bind:value={buyerPhone} class="inp" />
 			</div>
 		</div>
 	</fieldset>

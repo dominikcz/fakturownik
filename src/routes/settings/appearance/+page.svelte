@@ -165,6 +165,20 @@
 	</label>
 </div>
 
+<div class="form-group" style="margin-top: 8px">
+	<label class="checkbox-label">
+		<input type="checkbox" bind:checked={settings.showBuyerEmail} />
+		Pokaż email nabywcy na fakturze
+	</label>
+</div>
+
+<div class="form-group" style="margin-top: 8px">
+	<label class="checkbox-label">
+		<input type="checkbox" bind:checked={settings.showBuyerPhone} />
+		Pokaż telefon nabywcy na fakturze
+	</label>
+</div>
+
 <div class="form-group" style="margin-top:24px">
 	<p class="form-label">Logo firmy</p>
 	{#if settings.seller.logo}
